@@ -2,109 +2,193 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Case Roulette | Telegram Gifts</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <title>Gift Roulette — CS:GO Case Style</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <link href="https://fonts.googleapis.com/css?family=Russo+One|Montserrat:600,400&display=swap" rel="stylesheet">
   <style>
-    html, body {
-      margin: 0; padding: 0; width: 100vw; height: 100vh;
-      font-family: 'Nunito', 'Poppins', sans-serif;
-      background: linear-gradient(120deg,#212b37 0%,#19202d 100%);
-      color: #fff; min-height: 100vh; overflow-x: hidden;
+    html,body {
+      background: linear-gradient(120deg, #181e24 0%, #23272f 100%);
+      min-height: 100vh;
+      font-family: 'Montserrat', sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #fff;
     }
     .container {
-      max-width: 420px; margin: 0 auto; padding: 16px 0;
-      display: flex; flex-direction: column; align-items: center;
+      max-width: 380px;
+      margin: 32px auto;
+      background: #212633;
+      border-radius: 20px;
+      box-shadow: 0 6px 28px #000a;
+      padding: 30px 18px 24px 18px;
+      text-align: center;
     }
-    h1 { font-size: 2rem; margin-bottom: 16px; text-align: center;}
-    .roulette-wrap {
-      width: 320px; height: 110px; background: #181e28;
-      border-radius: 18px; box-shadow: 0 8px 32px #1115;
-      overflow: hidden; margin: 32px 0 20px 0; position: relative;
-      border: 2px solid #475472;
-      display: flex; align-items: center; justify-content: center;
+    .title {
+      font-family: 'Russo One', Arial, sans-serif;
+      font-size: 2.2rem;
+      letter-spacing: 1.5px;
+      margin-bottom: 4px;
+      background: linear-gradient(90deg, #e4c05c, #ffefb0 60%, #b0a871);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
     }
-    .roulette-line {
-      width: 120px; height: 110px; background:rgba(255,255,255,0.1);
-      border-left:3px solid #37f4;
-      border-right:3px solid #37f4;
-      position: absolute; left: 50%; transform: translateX(-50%);
-      top:0; z-index:10;
-      pointer-events:none;
+    .roulette {
+      background: #181d22;
+      border: 2px solid #2f3642;
+      border-radius: 18px;
+      box-shadow: 0 4px 18px #0006 inset;
+      margin: 18px 0 16px 0;
+      padding: 20px 0 16px 0;
+      position: relative;
+      overflow: hidden;
+      min-height: 88px;
+      user-select: none;
     }
-    .roulette-track {
-      display: flex; flex-direction: row; align-items: center;
-      height: 110px; position: absolute; left: 0; top: 0;
+    .roulette-list {
+      display: flex;
+      transition: transform 2.6s cubic-bezier(.11,.57,0,1);
       will-change: transform;
-      transition: transform 2.5s cubic-bezier(.3,1.9,.6,1);
+      align-items: center;
     }
-    .prize-card {
-      width: 100px; height: 100px; margin: 0 8px;
-      background: linear-gradient(140deg,#262c3a 50%,#434a61 100%);
-      border-radius: 12px; box-shadow: 0 2px 16px #12152a88;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      font-size: 1.3rem; position: relative; color:#fff;
-      border: 2px solid transparent; transition: border 0.2s;
+    .item {
+      min-width: 76px;
+      max-width: 76px;
+      height: 76px;
+      margin: 0 6px;
+      background: #242d3a;
+      border-radius: 13px;
+      box-shadow: 0 2px 10px #0007;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid #222b;
+      font-size: 1.5rem;
+      transition: border .12s;
+      position: relative;
     }
-    .prize-card.active { border:2px solid #37f4; background:#243b5c;}
-    .prize-emoji { font-size:2.2rem; margin-bottom:4px;}
-    .prize-title { font-size:1.05rem; }
-    .prize-id { font-size:.85rem; opacity:.45; margin-top:2px;}
+    .item.selected, .item.win {
+      border-color: #ffd700;
+      box-shadow: 0 0 14px 2px #ffd70055, 0 2px 10px #000a;
+      z-index: 2;
+    }
+    .item .gift-name {
+      font-size: 0.93rem;
+      color: #f4d58b;
+      margin-top: 7px;
+      letter-spacing: .03em;
+    }
+    .marker {
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      width: 0; height: 0;
+      border-left: 15px solid transparent;
+      border-right: 15px solid transparent;
+      border-bottom: 20px solid #f5cb4e;
+      filter: drop-shadow(0 2px 6px #222a);
+    }
     .spin-btn {
-      margin-top: 18px; background: #37f4; color: #181e28;
-      font-size: 1.3rem; font-weight: bold; border: none;
-      border-radius: 12px; padding: 10px 34px; cursor: pointer;
-      box-shadow: 0 4px 16px #37f44444; letter-spacing: .5px;
-      transition: background .2s;
+      margin-top: 20px;
+      width: 90%;
+      padding: 15px;
+      border-radius: 16px;
+      background: linear-gradient(90deg, #f5cb4e, #f9e67c 70%, #f5cb4e);
+      color: #191f26;
+      font-family: 'Russo One', Arial, sans-serif;
+      font-size: 1.3rem;
+      letter-spacing: .07em;
+      border: none;
+      outline: none;
+      box-shadow: 0 2px 14px #0005;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background .15s, transform .09s;
+      margin-bottom: 2px;
     }
-    .spin-btn:active { background: #2de;}
-    .win-block {
-      margin: 32px 0 0 0; padding: 22px 20px 16px 20px; background:#1c2535cc;
-      border-radius:16px; box-shadow: 0 2px 14px #151d2e66;
-      display: flex; flex-direction: column; align-items: center;
-      text-align:center; font-size: 1.15rem;
-      max-width: 350px;
+    .spin-btn:active {
+      background: #f6e5a3;
+      transform: scale(.97);
     }
-    .win-gift { font-size: 2.3rem; margin: 6px 0 0 0;}
+    .msg {
+      background: #262c36;
+      border-radius: 12px;
+      margin: 18px 0 10px 0;
+      padding: 15px 8px 13px 8px;
+      font-size: 1.13rem;
+      box-shadow: 0 2px 8px #0004 inset;
+      line-height: 1.55;
+    }
     .confirm-btn {
-      margin-top: 16px; background: #2ad9bb; color: #162024;
-      font-size: 1.15rem; font-weight: 600;
-      border: none; border-radius: 10px; padding: 10px 22px; cursor: pointer;
-      box-shadow: 0 2px 10px #2ad9bb33;
-      transition: background .2s;
+      background: #3ab54a;
+      color: #fff;
+      padding: 13px 34px;
+      border-radius: 13px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-top: 12px;
+      border: none;
+      cursor: pointer;
+      transition: background .14s;
     }
-    .confirm-btn:active { background: #1bd; }
-    .footer {
-      margin-top:40px; font-size:.98rem; opacity:.36; text-align:center;
+    .confirm-btn:active {
+      background: #278030;
     }
-    @media (max-width:500px) {
-      .container { padding: 0 0 24px 0;}
-      .roulette-wrap { width:98vw; max-width:352px;}
+    .history {
+      background: #242d3a;
+      border-radius: 13px;
+      margin-top: 24px;
+      padding: 13px 10px 9px 10px;
+      text-align: left;
+      font-size: 0.95rem;
+      color: #ccc;
+      min-height: 36px;
+    }
+    .history h4 {
+      margin: 0 0 8px 0;
+      color: #e8c067;
+      font-size: 1.1rem;
+    }
+    .history ul {
+      margin: 0; padding: 0 0 0 14px;
+    }
+    .history li {
+      margin-bottom: 2px;
+      color: #eee;
+    }
+    @media (max-width: 480px) {
+      .container { max-width: 99vw; margin: 12px 2vw;}
+      .roulette { min-height: 72px; }
+      .item { min-width: 64px; max-width: 64px; height: 64px;}
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎁 Gift Case Roulette</h1>
-    <div class="roulette-wrap">
-      <div class="roulette-track" id="roulette-track"></div>
-      <div class="roulette-line"></div>
-    </div>
-    <button class="spin-btn" id="spin-btn">Крутить бесплатно</button>
-    <div id="win-block" class="win-block" style="display:none"></div>
-    <div class="footer">Powered by <b>Telegram Mini App</b> + Firebase</div>
+<div class="container">
+  <div class="title">Gift Roulette</div>
+  <div class="roulette" id="roulette">
+    <div class="marker"></div>
+    <div class="roulette-list" id="rouletteList"></div>
   </div>
+  <button class="spin-btn" id="spinBtn">Крутить бесплатно</button>
+  <div class="msg" id="msgBox" style="display:none"></div>
+  <button class="confirm-btn" id="confirmBtn" style="display:none">Я отправил сообщение боту</button>
+  <div class="history" id="historyBox">
+    <h4>История выигрышей</h4>
+    <ul id="historyList"></ul>
+  </div>
+</div>
 
-  <script>
-  // ---- ПРИЗЫ (замени на актуальные ID и эмодзи)
-  const PRIZES = [
-    { id: '5170145012310081615', emoji: '💝', title: 'Сердце',        weight: 2 },
-    { id: '5170233102089322756', emoji: '🧸', title: 'Плюшевый мишка',weight: 1 }
-  ];
-
-  // ---- FIREBASE (замени на свои настройки!)
+<!-- Firebase & Telegram Mini Apps SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+/* ---- 1. CONFIG ---- */
+// Вставь сюда свой firebase config:
 const firebaseConfig = {
   apiKey: "AIzaSyDX8BiSqlghdgOj4_zPSyPgATfHVV5DNQI",
   authDomain: "gifts-d8f30.firebaseapp.com",
@@ -114,65 +198,129 @@ const firebaseConfig = {
   appId: "1:883903383261:web:dad1742c009ea38bf5fd34",
   measurementId: "G-5JFXH4YG3J"
 };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+const gifts = [
+  { id: 5170145012310081615, emoji: "💖", name: "Сердце" },
+  { id: 5170233102089322756, emoji: "🧸", name: "Плюшевый мишка" }
+];
+/* ---- 2. FIREBASE INIT ---- */
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-  // ---- Telegram WebApp init
-  Telegram.WebApp.ready();
-  const tgUser = Telegram.WebApp.initDataUnsafe.user || {};
-  const userId = tgUser.id || ("dev_" + Math.floor(100000+Math.random()*899999));
-  const username = tgUser.username || 'unknown';
-
-  // ---- Сохраняем вход пользователя
-  async function saveUserSession() {
-    const now = new Date().toISOString();
-    await db.ref('users/' + userId).set({
-      id: userId,
-      username,
-      time: now,
-      lastSpin: null
-    });
+/* ---- 3. TELEGRAM AUTH ---- */
+let userId = null, userName = "";
+function getTelegramUser() {
+  if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
+    const tgUser = Telegram.WebApp.initDataUnsafe.user;
+    userId = tgUser.id;
+    userName = (tgUser.username ? ("@" + tgUser.username) : tgUser.first_name || "User");
+    return tgUser;
+  } else {
+    // для теста (ЗАКОММЕНТИРУЙ НА РЕАЛЬНОМ СЕРВЕРЕ!)
+    // userId = 123456789;
+    // userName = "Test User";
+    // return {id:userId, first_name:"Test User"};
+    alert("Откройте сайт из Telegram Mini App!");
+    throw "Not in Telegram Mini App";
   }
-  saveUserSession();
+}
+getTelegramUser();
 
-  // ---- Инициализация рулетки
-  const track = document.getElementById('roulette-track');
-  function fillRoulette(prizes, repeat=14) {
-    // Скопировать призы в случайном порядке N раз, чтобы была красивая анимация
-    let line = [];
-    for(let r=0; r<repeat; r++)
-      line = line.concat(prizes.sort(()=>Math.random()-.5));
-    track.innerHTML = '';
-    line.forEach((p,i) => {
-      const card = document.createElement('div');
-      card.className = 'prize-card';
-      card.innerHTML = `<div class="prize-emoji">${p.emoji}</div>
-        <div class="prize-title">${p.title}</div>
-        <div class="prize-id">${p.id.slice(-6)}</div>`;
-      track.appendChild(card);
+/* ---- 4. ПОЛУЧЕНИЕ ИСТОРИИ ---- */
+function loadHistory() {
+  if (!userId) return;
+  db.ref("users/" + userId + "/spins").once("value", snap => {
+    const arr = [];
+    snap.forEach(child => {
+      const v = child.val();
+      arr.push(`${v.time}: ${gifts.find(g=>g.id==v.gift)?.emoji||'🎁'} <b>${gifts.find(g=>g.id==v.gift)?.name||'Подарок'}</b>`);
     });
-    return line;
+    document.getElementById('historyList').innerHTML = arr.length
+      ? arr.map(x=>`<li>${x}</li>`).join('')
+      : '<li>Пока ничего не выиграно</li>';
+  });
+}
+
+/* ---- 5. РУЛЕТКА ---- */
+const rouletteList = document.getElementById("rouletteList");
+let isSpinning = false, selectedIdx = 0;
+
+function fillRoulette(selected=-1) {
+  rouletteList.innerHTML = "";
+  for (let i=0; i<gifts.length*4; ++i) {
+    const gift = gifts[i%gifts.length];
+    const div = document.createElement("div");
+    div.className = "item" + (i===selected ? " selected" : "");
+    div.innerHTML = `<div style="font-size:2.2em">${gift.emoji}</div><div class="gift-name">${gift.name}</div>`;
+    rouletteList.appendChild(div);
   }
+}
 
-  // ---- Механика крутки
-  let lastPrize = null, lastPrizeObj = null;
-  const spinBtn = document.getElementById('spin-btn');
-  spinBtn.onclick = async function() {
-    spinBtn.disabled = true;
-    document.getElementById('win-block').style.display = 'none';
-    // Запрещаем спамить
-    let fullLine = fillRoulette(PRIZES, 14);
+fillRoulette();
 
-    // Выбор приза по весу
-    let weighted = [];
-    PRIZES.forEach(pr => { for(let i=0;i<pr.weight;i++) weighted.push(pr); });
-    const prize = weighted[Math.floor(Math.random()*weighted.length)];
-    lastPrize = prize.id; lastPrizeObj = prize;
+/* ---- 6. КНОПКА КРУТИТЬ ---- */
+document.getElementById("spinBtn").onclick = function() {
+  if (isSpinning) return;
+  isSpinning = true;
+  document.getElementById('msgBox').style.display = 'none';
+  document.getElementById('confirmBtn').style.display = 'none';
 
-    // Где выпасть?
-    let prizeIndex = Math.floor(fullLine.length/2) + Math.floor(Math.random()*PRIZES.length);
-    fullLine[prizeIndex] = prize;
-    // Анимация
-    const cardWidth = 116, offset = (cardWidth * prizeIndex) - 110; // центр линии
-    track.style.transition = "none";
-    track.style.transform = `translateX(0px)`;
+  // Рандом выигрышного подарка
+  const winIdx = Math.floor(Math.random()*gifts.length);
+  const spinRounds = 16 + Math.floor(Math.random()*5);
+  selectedIdx = spinRounds * gifts.length + winIdx;
+
+  fillRoulette();
+  rouletteList.style.transition = "none";
+  rouletteList.style.transform = "translateX(0)";
+
+  setTimeout(()=> {
+    rouletteList.style.transition = "transform 2.7s cubic-bezier(.11,.57,0,1)";
+    const width = 76+12; // item+margin*2
+    const offset = selectedIdx*width - (rouletteList.parentNode.offsetWidth/2) + width/2;
+    rouletteList.style.transform = `translateX(${-offset}px)`;
+    // после анимации
+    setTimeout(()=>{
+      isSpinning = false;
+      // выделить выигрышный
+      for (let i=0;i<rouletteList.children.length;i++) rouletteList.children[i].classList.remove('win');
+      rouletteList.children[selectedIdx].classList.add('win');
+
+      // Показать выигрыш, записать в Firebase
+      const gift = gifts[winIdx];
+      const msg = `Вы выиграли <b>${gift.emoji} ${gift.name}</b>!<br>
+      Чтобы получить приз, <b>напишите любое сообщение боту <a href="https://t.me/MrFerra" target="_blank">@MrFerra</a></b>.<br>
+      После этого нажмите кнопку ниже.`;
+      document.getElementById('msgBox').innerHTML = msg;
+      document.getElementById('msgBox').style.display = '';
+      document.getElementById('confirmBtn').style.display = '';
+
+      // Запись в базу
+      const now = new Date();
+      db.ref("users/"+userId).update({
+        id: userId,
+        name: userName,
+        lastSpin: now.toISOString()
+      });
+      db.ref("users/"+userId+"/spins").push({
+        gift: gift.id,
+        time: now.toLocaleString()
+      });
+      loadHistory();
+    }, 2750);
+  }, 80);
+};
+
+/* ---- 7. КНОПКА "Я отправил" ---- */
+document.getElementById('confirmBtn').onclick = function() {
+  db.ref("users/"+userId).update({
+    confirmed: new Date().toISOString()
+  });
+  document.getElementById('msgBox').innerHTML = 'Отлично! Ваша заявка отмечена. Ожидайте получения подарка!';
+  document.getElementById('confirmBtn').style.display = 'none';
+};
+
+/* ---- 8. Старт загрузки ---- */
+window.onload = loadHistory;
+</script>
+</body>
+</html>
