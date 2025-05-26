@@ -79,7 +79,7 @@
     }
     .roulette-list {
       display: flex;
-      transition: transform 2.6s cubic-bezier(.11,.57,0,1);
+      transition: transform 2.8s cubic-bezier(.11,.57,0,1);
       will-change: transform;
       align-items: center;
     }
@@ -266,15 +266,14 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
 /* ---- 1. CONFIG ---- */
-// Вставь сюда свой firebase config:
 const firebaseConfig = {
-  apiKey: "AIzaSyDX8BiSqlghdgOj4_zPSyPgATfHVV5DNQI",
-  authDomain: "gifts-d8f30.firebaseapp.com",
-  projectId: "gifts-d8f30",
-  storageBucket: "gifts-d8f30.firebasestorage.app",
-  messagingSenderId: "883903383261",
-  appId: "1:883903383261:web:dad1742c009ea38bf5fd34",
-  measurementId: "G-5JFXH4YG3J"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  databaseURL: "YOUR_DB_URL",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_BUCKET",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 const gifts = [
   { id: 5170145012310081615, emoji: "💖", name: "Сердце" },
@@ -345,8 +344,8 @@ let isSpinning = false, selectedIdx = 0;
 
 function fillRoulette(selected=-1) {
   rouletteList.innerHTML = "";
-  // Всегда заполняем 20 элементов, чтобы призы шли подряд
-  for (let i=0; i<20; ++i) {
+  // По кругу, много раз, чтобы не было пустых мест
+  for (let i=0; i<28; ++i) {
     const gift = gifts[i % gifts.length];
     const div = document.createElement("div");
     div.className = "item" + (i===selected ? " selected" : "");
@@ -364,8 +363,10 @@ document.getElementById("spinBtn").onclick = function() {
 
   // Честный шанс 50/50 для двух подарков
   const winIdx = Math.random() < 0.5 ? 0 : 1;
-  const spinRounds = 14 + Math.floor(Math.random()*6); // случайное количество оборотов
-  selectedIdx = spinRounds * gifts.length + winIdx;
+  // Выбираем нужный индекс в длинной ленте
+  const fullRounds = 12 + Math.floor(Math.random()*5); // случайное число оборотов
+  const itemsCount = gifts.length;
+  selectedIdx = fullRounds * itemsCount + winIdx;
 
   fillRoulette();
 
@@ -437,7 +438,6 @@ function showSnackbar(msg, time=2800) {
 }
 
 /* ---- 11. CONFETTI ---- */
-// Красочное конфетти после выигрыша
 function confettiEffect() {
   const colors = ["#ffd700", "#ff69b4", "#00e0ca", "#ffe579", "#f68c47", "#74dbef", "#f54555"];
   const canvas = document.getElementById("confetti");
