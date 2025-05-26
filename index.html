@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Gift Roulette — CS:GO Case Style</title>
+  <title>Gift Roulette — CS:GO Style</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <link href="https://fonts.googleapis.com/css?family=Russo+One|Montserrat:600,400&display=swap" rel="stylesheet">
   <style>
@@ -15,12 +15,12 @@
       color: #fff;
     }
     .container {
-      max-width: 380px;
-      margin: 32px auto;
+      max-width: 400px;
+      margin: 30px auto;
       background: #212633;
       border-radius: 20px;
       box-shadow: 0 6px 28px #000a;
-      padding: 30px 18px 24px 18px;
+      padding: 28px 16px 24px 16px;
       text-align: center;
       position: relative;
       overflow: visible;
@@ -79,9 +79,9 @@
     }
     .roulette-list {
       display: flex;
-      align-items: center;
+      transition: transform 2.5s cubic-bezier(.11,.57,0,1);
       will-change: transform;
-      transition: transform 2.7s cubic-bezier(.11,.57,0,1);
+      align-items: center;
     }
     .item {
       min-width: 76px;
@@ -140,14 +140,6 @@
       font-weight: 700;
       transition: background .15s, transform .09s;
       margin-bottom: 2px;
-      opacity: 1;
-      pointer-events: all;
-    }
-    .spin-btn:disabled,
-    .spin-btn[disabled] {
-      opacity: 0.5;
-      cursor: not-allowed;
-      pointer-events: none;
     }
     .spin-btn:active {
       background: #f6e5a3;
@@ -202,32 +194,41 @@
     .snackbar {
       position: fixed;
       left: 50%;
-      bottom: 32px;
+      bottom: 22px;
+      min-width: 190px;
+      background: #242d3a;
+      color: #ffebc7;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px #0008;
+      padding: 12px 25px;
+      font-size: 1.12rem;
+      z-index: 1001;
       transform: translateX(-50%);
-      min-width: 180px;
-      background: #222b;
-      color: #ffd767;
-      font-weight: 600;
-      border-radius: 14px;
-      box-shadow: 0 4px 18px #0006;
-      padding: 13px 34px;
-      z-index: 9999;
       opacity: 0;
       pointer-events: none;
-      font-size: 1.09rem;
-      transition: opacity .18s, bottom .18s;
+      transition: opacity .25s;
     }
-    .snackbar.show {
+    .snackbar.active {
       opacity: 1;
-      bottom: 64px;
-      pointer-events: all;
+      pointer-events: auto;
     }
-    #confetti-canvas {
+    /* Конфетти */
+    .confetti {
       pointer-events: none;
       position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      z-index: 9999;
-      display: none;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      z-index: 1002;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 12px; height: 28px;
+      opacity: .85;
+      border-radius: 3px;
+      transform: rotate(0deg);
+      will-change: transform, top, left;
+      mix-blend-mode: plus-lighter;
     }
     @media (max-width: 480px) {
       .container { max-width: 99vw; margin: 12px 2vw;}
@@ -259,30 +260,27 @@
     <ul id="historyList"></ul>
   </div>
 </div>
-<canvas id="confetti-canvas"></canvas>
-<div id="snackbar" class="snackbar"></div>
+<div class="snackbar" id="snackbar"></div>
+<div class="confetti" id="confetti"></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
 /* ---- 1. CONFIG ---- */
-// Вставь сюда свой firebase config:
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  databaseURL: "YOUR_DB_URL",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_BUCKET",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDX8BiSqlghdgOj4_zPSyPgATfHVV5DNQI",
+  authDomain: "gifts-d8f30.firebaseapp.com",
+  projectId: "gifts-d8f30",
+  storageBucket: "gifts-d8f30.firebasestorage.app",
+  messagingSenderId: "883903383261",
+  appId: "1:883903383261:web:dad1742c009ea38bf5fd34",
+  measurementId: "G-5JFXH4YG3J"
 };
-// Призы — можно добавить больше
 const gifts = [
   { id: 5170145012310081615, emoji: "💖", name: "Сердце" },
   { id: 5170233102089322756, emoji: "🧸", name: "Плюшевый мишка" }
 ];
-
 /* ---- 2. FIREBASE INIT ---- */
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
@@ -297,7 +295,7 @@ function getTelegramUser() {
     userPhoto = tgUser.photo_url ? tgUser.photo_url : "https://telegram.org/img/t_logo.png";
     return tgUser;
   } else {
-    snackbar("Откройте сайт из Telegram Mini App!");
+    showSnackbar("Откройте сайт из Telegram Mini App!"); // мягко
     throw "Not in Telegram Mini App";
   }
 }
@@ -332,7 +330,7 @@ function loadHistory() {
     const arr = [];
     snap.forEach(child => {
       const v = child.val();
-      arr.push(`${v.time}: ${gifts.find(g=>g.id==v.gift)?.emoji||'🎁'} <b>${gifts.find(g=>g.id==v.gift)?.name||'Подарок'}</b>`);
+      arr.push(`${v.time}: ${gifts.find(g=>g.id==v.gift)?.emoji||'🎁'} <b>${gifts.find(g=>g.id==v.gift)?.name||'Подарок'}</b>${v.confirmed?" <span style='color:#8cff8c'>(подтверждено)</span>":""}`);
     });
     document.getElementById('historyList').innerHTML = arr.length
       ? arr.map(x=>`<li>${x}</li>`).join('')
@@ -347,8 +345,8 @@ let isSpinning = false, selectedIdx = 0;
 
 function fillRoulette(selected=-1) {
   rouletteList.innerHTML = "";
-  // Подарки всегда повторяются, исчезать не могут
-  for (let i=0; i<gifts.length*14; ++i) { // длинная лента для эффекта
+  // Показываем подряд эти 2 подарка, много раз
+  for (let i=0; i<gifts.length*12; ++i) {
     const gift = gifts[i%gifts.length];
     const div = document.createElement("div");
     div.className = "item" + (i===selected ? " selected" : "");
@@ -356,19 +354,62 @@ function fillRoulette(selected=-1) {
     rouletteList.appendChild(div);
   }
 }
+
 fillRoulette();
 
-/* ---- 8. SPIN BUTTON ---- */
-document.getElementById("spinBtn").onclick = function() {
-  if (isSpinning) return;
-  isSpinning = true;
-  this.disabled = true;
-  document.getElementById('msgBox').style.display = 'none';
-  document.getElementById('confirmBtn').style.display = 'none';
+/* ---- 8. SNACKBAR ---- */
+function showSnackbar(text, timeout=2200) {
+  const bar = document.getElementById('snackbar');
+  bar.textContent = text;
+  bar.classList.add('active');
+  setTimeout(()=>bar.classList.remove('active'), timeout);
+}
 
-  // 50/50 шанс между двумя подарками
-  const winIdx = Math.random()<0.5 ? 0 : 1;
-  const spinRounds = 8 + Math.floor(Math.random()*5); // короткая лента = круче UX
+/* ---- 9. CONFETTI ---- */
+function showConfetti() {
+  const colors = ['#f5cb4e','#ffe79c','#d5ff8c','#fa6f6f','#8cff8c','#ffd4ff','#88e6ff','#fff'];
+  const confettiDiv = document.getElementById('confetti');
+  confettiDiv.innerHTML = '';
+  for(let i=0;i<38;i++){
+    const c = document.createElement('div');
+    c.className='confetti-piece';
+    c.style.background=colors[Math.floor(Math.random()*colors.length)];
+    c.style.left=(Math.random()*100)+'vw';
+    c.style.top=-(Math.random()*20)+'px';
+    c.style.opacity = 0.77+Math.random()*0.23;
+    c.style.width = (8+Math.random()*10)+'px';
+    c.style.height = (18+Math.random()*16)+'px';
+    c.style.borderRadius = (2+Math.random()*3)+'px';
+    c.style.transform=`rotate(${Math.random()*360}deg)`;
+    confettiDiv.appendChild(c);
+    // Анимация
+    setTimeout(()=>{
+      c.animate([
+        {top: c.style.top, left: c.style.left, transform: c.style.transform, opacity: c.style.opacity},
+        {top:'110vh', left:(parseFloat(c.style.left)+(Math.random()*60-30))+'vw', transform:`rotate(${Math.random()*900}deg)`, opacity:0.1}
+      ],{
+        duration:2200+Math.random()*1000,
+        easing:"cubic-bezier(.3,.75,.38,1)"
+      });
+    },Math.random()*400);
+  }
+  setTimeout(()=>confettiDiv.innerHTML='',3300);
+}
+
+/* ---- 10. SPIN BUTTON ---- */
+const spinBtn = document.getElementById("spinBtn");
+spinBtn.onclick = function() {
+  if (isSpinning) {
+    showSnackbar("Подождите окончания прокрутки");
+    return;
+  }
+  isSpinning = true;
+  spinBtn.disabled = true;
+  spinBtn.style.opacity = 0.6;
+
+  // 50/50 шанс — выбираем 0 или 1
+  const winIdx = Math.random()<0.5?0:1;
+  const spinRounds = 14 + Math.floor(Math.random()*4); // красивое число оборотов
   selectedIdx = spinRounds * gifts.length + winIdx;
 
   fillRoulette();
@@ -376,113 +417,64 @@ document.getElementById("spinBtn").onclick = function() {
   rouletteList.style.transform = "translateX(0)";
 
   setTimeout(()=> {
-    rouletteList.style.transition = "transform 2.7s cubic-bezier(.11,.57,0,1)";
-    const width = 76+12; // item+margin*2
+    rouletteList.style.transition = "transform 2.5s cubic-bezier(.11,.57,0,1)";
+    const width = 76+12;
     const offset = selectedIdx*width - (rouletteList.parentNode.offsetWidth/2) + width/2;
     rouletteList.style.transform = `translateX(${-offset}px)`;
     setTimeout(()=>{
       isSpinning = false;
-      document.getElementById("spinBtn").disabled = false;
+      spinBtn.disabled = false;
+      spinBtn.style.opacity = 1;
       for (let i=0;i<rouletteList.children.length;i++) rouletteList.children[i].classList.remove('win');
       rouletteList.children[selectedIdx].classList.add('win');
-
-      // Конфетти!
-      confetti();
-
-      // Показать выигрыш, записать в Firebase
+      // Выигрыш
       const gift = gifts[winIdx];
+      showConfetti();
+
       const msg = `Вы выиграли <b>${gift.emoji} ${gift.name}</b>!<br>
-        Чтобы получить приз, <b>напишите любое сообщение боту <a href="https://t.me/MrFerra" target="_blank">@MrFerra</a></b>.<br>
-        После этого нажмите кнопку ниже.`;
+      Чтобы получить приз, <b>напишите любое сообщение боту <a href="https://t.me/MrFerra" target="_blank">@MrFerra</a></b>.<br>
+      После этого нажмите кнопку ниже.`;
       document.getElementById('msgBox').innerHTML = msg;
       document.getElementById('msgBox').style.display = '';
       document.getElementById('confirmBtn').style.display = '';
 
-      // Запись в базу юзера
+      // В БД
       const now = new Date();
+      const spinRef = db.ref("users/"+userId+"/spins").push();
+      spinRef.set({
+        gift: gift.id,
+        time: now.toLocaleString(),
+        confirmed: false
+      });
       db.ref("users/"+userId).update({
         id: userId,
         name: userName,
         photo: userPhoto,
         lastSpin: now.toISOString()
       });
-      db.ref("users/"+userId+"/spins").push({
-        gift: gift.id,
-        time: now.toLocaleString()
-      });
       loadHistory();
-
-      snackbar("🎉 Вы выиграли приз! Не забудьте связаться с ботом");
-    }, 2750);
-  }, 80);
+      showSnackbar("Выигрыш записан в историю!");
+    }, 2500);
+  }, 70);
 };
 
-/* ---- 9. CONFIRM BUTTON ---- */
+/* ---- 11. CONFIRM BUTTON ---- */
 document.getElementById('confirmBtn').onclick = function() {
-  db.ref("users/"+userId).update({
-    confirmed: new Date().toISOString()
-  });
-  document.getElementById('msgBox').innerHTML = 'Отлично! Ваша заявка отмечена. Ожидайте получения подарка!';
-  document.getElementById('confirmBtn').style.display = 'none';
-  snackbar("Заявка на получение подарка подтверждена");
-};
-
-/* ---- 10. Snackbar ---- */
-function snackbar(msg) {
-  const sb = document.getElementById("snackbar");
-  sb.textContent = msg;
-  sb.className = "snackbar show";
-  setTimeout(()=>sb.className="snackbar",2600);
-}
-
-/* ---- 11. Конфетти ---- */
-function confetti() {
-  const canvas = document.getElementById('confetti-canvas');
-  const w = window.innerWidth, h = window.innerHeight;
-  canvas.width = w; canvas.height = h;
-  canvas.style.display = 'block';
-
-  const ctx = canvas.getContext('2d');
-  let confs = [];
-  for (let i=0; i<90; ++i) {
-    confs.push({
-      x: Math.random()*w,
-      y: Math.random()*-h,
-      r: 6+Math.random()*9,
-      d: Math.random()*90,
-      color: `hsl(${Math.random()*360},80%,60%)`,
-      tilt: Math.random()*15-7,
-      tiltAngle: 0,
-      tiltAngleIncremental: (Math.random()*0.07) + 0.05
+  // Подтвердить последний спин
+  db.ref("users/"+userId+"/spins").orderByKey().limitToLast(1).once("value", snap=>{
+    snap.forEach(child=>{
+      child.ref.update({confirmed:true});
     });
-  }
-  let angle = 0;
-  function drawConfetti() {
-    ctx.clearRect(0, 0, w, h);
-    angle += 0.01;
-    for (let i=0; i<confs.length; ++i) {
-      let c = confs[i];
-      c.y += (Math.cos(angle + c.d) + 2 + c.r/5) * 0.8;
-      c.x += Math.sin(angle) * 2;
-      c.tiltAngle += c.tiltAngleIncremental;
-      c.tilt = Math.sin(c.tiltAngle) * 15;
-      ctx.beginPath();
-      ctx.lineWidth = c.r;
-      ctx.strokeStyle = c.color;
-      ctx.moveTo(c.x + c.tilt + c.r/3, c.y);
-      ctx.lineTo(c.x + c.tilt, c.y + c.tilt + c.r*1.2);
-      ctx.stroke();
-    }
-  }
-  let t = 0;
-  function animate() {
-    drawConfetti();
-    t++;
-    if (t < 85) requestAnimationFrame(animate);
-    else canvas.style.display = 'none';
-  }
-  animate();
-}
+    db.ref("users/"+userId).update({
+      confirmed: new Date().toISOString()
+    });
+    document.getElementById('msgBox').innerHTML = 'Отлично! Ваша заявка отмечена. Ожидайте получения подарка!';
+    document.getElementById('confirmBtn').style.display = 'none';
+    showSnackbar("Заявка подтверждена!");
+    loadHistory();
+  });
+};
 </script>
 </body>
 </html>
+
