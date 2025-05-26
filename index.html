@@ -414,10 +414,11 @@ document.getElementById("spinBtn").onclick = function() {
         lastSpin: now.toISOString()
       });
       db.ref("users/"+userId+"/spins").push({
-        gift: slots[selectedIdx].id,
-        time: now.toLocaleString(),
-        status: "not_claimed"
-      });
+    gift: slots[selectedIdx].id, // <-- ДОЛЖНО БЫТЬ ИМЕННО ТАК!
+    time: now.toLocaleString(),
+    status: "not_claimed"
+});
+
       loadHistoryCards();
       confettiEffect();
     }, 2100);
