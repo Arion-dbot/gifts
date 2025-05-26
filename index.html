@@ -3,39 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <title>Gift Roulette — CS:GO Case Style</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <link href="https://fonts.googleapis.com/css?family=Russo+One|Montserrat:600,400&display=swap" rel="stylesheet">
   <style>
-    html,body {
+    html, body {
       background: linear-gradient(120deg, #181e24 0%, #23272f 100%);
       min-height: 100vh;
+      margin: 0; padding: 0;
       font-family: 'Montserrat', sans-serif;
-      margin: 0; padding: 0; color: #fff;
+      color: #fff;
     }
     .container {
       max-width: 380px; margin: 32px auto;
-      background: #212633; border-radius: 20px;
-      box-shadow: 0 6px 28px #000a; padding: 30px 18px 24px;
-      text-align: center; position: relative;
+      background: #212633;
+      border-radius: 20px;
+      box-shadow: 0 6px 28px #000a;
+      padding: 30px 18px 24px;
+      text-align: center;
     }
     .profile {
-      display: flex; align-items: center; margin-bottom: 18px; gap: 16px;
+      display: flex; align-items: center;
+      margin-bottom: 18px; gap: 16px;
       justify-content: center;
     }
     .profile-img {
-      width: 54px; height: 54px; border-radius: 50%;
-      object-fit: cover; border: 2.5px solid #ffe48a;
+      width: 54px; height: 54px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2.5px solid #ffe48a;
       background: #191c22;
     }
-    .profile-info { text-align: left; font-size: 1.05rem; }
-    .profile-info .uname {
-      color: #ffe79c; font-family: 'Russo One', sans-serif;
-      font-size: 1.18rem; display: block; word-break: break-word;
+    .profile-info {
+      text-align: left; font-size: 1.05rem; max-width: 200px;
+      overflow: hidden; text-overflow: ellipsis;
     }
-    .profile-info #profileId { font-size: 0.85rem; color: #ccc; }
+    .profile-info .uname {
+      color: #ffe79c;
+      font-family: 'Russo One', sans-serif;
+      font-size: 1.18rem; margin-bottom: 3px;
+      display: block; word-break: break-word;
+    }
     .title {
-      font-family: 'Russo One', sans-serif; font-size: 2.2rem;
-      letter-spacing: 1.5px; margin-bottom: 4px;
+      font-family: 'Russo One', sans-serif;
+      font-size: 2.2rem; letter-spacing: 1.5px; margin-bottom: 4px;
       background: linear-gradient(90deg, #e4c05c, #ffefb0 60%, #b0a871);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       display: inline-block;
@@ -43,95 +53,109 @@
     .roulette {
       background: #181d22; border: 2px solid #2f3642;
       border-radius: 18px; box-shadow: inset 0 4px 18px #0006;
-      margin: 18px 0 16px; padding: 20px 0 16px;
+      margin: 18px 0; padding: 20px 0 16px;
       position: relative; overflow: hidden; min-height: 88px;
       user-select: none;
     }
     .roulette-list {
-      display: flex; transition: transform 2.6s cubic-bezier(.11,.57,0,1);
-      will-change: transform; align-items: center;
+      display: flex; align-items: center;
+      transition: transform 2.6s cubic-bezier(.11,.57,0,1);
+      will-change: transform;
     }
     .item {
       width: 76px; height: 76px; margin: 0 6px;
       background: #242d3a; border-radius: 13px;
-      box-shadow: 0 2px 10px #0007; display: flex;
-      flex-direction: column; justify-content: center;
-      align-items: center; border: 2px solid #222b;
-      transition: border .12s; position: relative;
+      box-shadow: 0 2px 10px #0007;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      border: 2px solid #222b; font-size: 1.5rem;
+      position: relative; transition: border .12s;
     }
-    .item.win {
-      border-color: #ffd700; box-shadow: 0 0 14px 2px #ffd70055, 0 2px 10px #000a;
+    .item.selected, .item.win {
+      border-color: #ffd700;
+      box-shadow: 0 0 14px 2px #ffd70055, 0 2px 10px #000a;
       z-index: 2;
     }
-    .gift-name {
-      font-size: 0.93rem; color: #f4d58b; margin-top: 7px;
-      letter-spacing: .03em;
+    .item .gift-name {
+      font-size: 0.93rem; color: #f4d58b;
+      margin-top: 7px; letter-spacing: .03em;
     }
     .marker {
       position: absolute; top: 6px; left: 50%;
-      transform: translateX(-50%); width: 0; height: 0;
+      transform: translateX(-50%);
+      width: 0; height: 0;
       border-left: 15px solid transparent;
       border-right: 15px solid transparent;
       border-bottom: 20px solid #f5cb4e;
       filter: drop-shadow(0 2px 6px #222a);
-      z-index: 2;
-    }
-    .spin-btn, .confirm-btn {
-      width: 90%; padding: 15px; border-radius: 16px;
-      font-family: 'Russo One', sans-serif; font-size: 1.3rem;
-      letter-spacing: .07em; border: none; outline: none;
-      cursor: pointer; font-weight: 700; transition: background .15s, transform .09s;
-      box-shadow: 0 2px 14px #0005; margin: 10px 0;
+      z-index:2;
     }
     .spin-btn {
-      background: linear-gradient(90deg, #f5cb4e, #f9e67c 70%, #f5cb4e);
-      color: #191f26;
+      margin-top: 20px; width: 90%; padding: 15px;
+      border-radius: 16px; background: linear-gradient(90deg, #f5cb4e, #f9e67c 70%, #f5cb4e);
+      color: #191f26; font-family: 'Russo One', sans-serif;
+      font-size: 1.3rem; letter-spacing: .07em; border: none;
+      box-shadow: 0 2px 14px #0005; cursor: pointer;
+      font-weight:700; transition: background .15s, transform .09s;
     }
     .spin-btn:disabled {
-      opacity: .6; cursor: not-allowed;
+      opacity: 0.6; cursor: default;
     }
-    .spin-btn:active { transform: scale(.97); }
-    .confirm-btn {
-      background: #3ab54a; color: #fff; padding: 13px 34px;
-      border-radius: 13px; font-size: 1.15rem;
+    .spin-btn:active:not(:disabled) {
+      background: #f6e5a3; transform: scale(.97);
     }
-    .confirm-btn:active { background: #278030; }
     .msg {
-      background: #262c36; border-radius: 12px; margin: 18px 0;
-      padding: 15px 8px; font-size: 1.13rem; box-shadow: inset 0 2px 8px #0004;
-      line-height: 1.55; text-align: left;
+      background: #262c36; border-radius: 12px;
+      margin:18px 0; padding: 15px 8px; font-size:1.13rem;
+      box-shadow: inset 0 2px 8px #0004; line-height:1.55;
     }
+    .confirm-btn {
+      background: #3ab54a; color:#fff; padding:13px 34px;
+      border-radius:13px; font-size:1.15rem; font-weight:700;
+      border:none; cursor:pointer; transition:background .14s;
+    }
+    .confirm-btn:active { background:#278030; }
     .history {
-      background: #242d3a; border-radius: 13px; margin-top: 24px;
-      padding: 13px 10px; text-align: left; font-size: .95rem;
-      color: #ccc; min-height: 36px;
+      background:#242d3a; border-radius:13px;
+      margin-top:24px; padding:13px 10px; text-align:left;
+      font-size:.95rem; color:#ccc; min-height:36px;
     }
-    .history h4 { margin: 0 0 8px; color: #e8c067; font-size: 1.1rem; }
-    .history ul { padding-left: 16px; margin: 0; }
-    .history li { margin-bottom: 2px; color: #eee; }
+    .history h4 { margin:0 0 8px; color:#e8c067; font-size:1.1rem;}
+    .history ul { margin:0; padding-left:14px;}
+    .history li { margin-bottom:2px;}
     /* Snackbar */
     #snackbar {
-      visibility: hidden; min-width: 200px; background: #333;
-      color: #fff; text-align: center; border-radius: 4px;
-      padding: 12px; position: fixed; left: 50%; bottom: 30px;
-      transform: translateX(-50%); font-size: .95rem;
-      z-index: 10;
+      visibility: hidden;
+      min-width: 200px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 8px;
+      padding: 14px;
+      position: fixed;
+      left: 50%; bottom: 30px;
+      transform: translateX(-50%);
+      z-index: 999;
+      font-size: 1rem;
     }
     #snackbar.show {
-      visibility: visible; animation: fadein .5s, fadeout .5s 2.5s;
+      visibility: visible;
+      animation: fadein 0.3s, fadeout 0.3s 2.7s;
     }
-    @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
-    @keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
-    @media (max-width:480px){
-      .item { width:64px; height:64px; }
-      .profile-img { width:42px; height:42px; }
+    @keyframes fadein { from {bottom: 10px; opacity:0;} to {bottom:30px; opacity:1;} }
+    @keyframes fadeout{ from {opacity:1;} to {opacity:0;} }
+    @media(max-width:480px){
+      .container{max-width:99vw;margin:12px 2vw;}
+      .roulette{min-height:72px;}
+      .item{width:64px;height:64px;}
+      .profile-img{width:42px;height:42px;}
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="profile" id="profileBox" style="display:none;">
-      <img id="profileImg" class="profile-img" src="" alt="User">
+      <img class="profile-img" id="profileImg" src="" alt="User">
       <div class="profile-info">
         <span class="uname" id="profileName"></span>
         <span id="profileId"></span>
@@ -142,25 +166,24 @@
       <div class="marker"></div>
       <div class="roulette-list" id="rouletteList"></div>
     </div>
-    <button id="spinBtn" class="spin-btn">Крутить бесплатно</button>
-    <div id="msgBox" class="msg" style="display:none"></div>
-    <button id="confirmBtn" class="confirm-btn" style="display:none">Я отправил сообщение боту</button>
-    <div class="history">
+    <button class="spin-btn" id="spinBtn">Крутить бесплатно</button>
+    <div class="msg" id="msgBox" style="display:none;"></div>
+    <button class="confirm-btn" id="confirmBtn" style="display:none;">Я отправил сообщение боту</button>
+    <div class="history" id="historyBox">
       <h4>История выигрышей</h4>
       <ul id="historyList"></ul>
     </div>
   </div>
   <div id="snackbar"></div>
 
-  <!-- Dependencies -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <!-- Firebase & Telegram SDK & confetti -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
   <script>
-  // 1. Config
-  const firebaseConfig = {
+    // 1. CONFIG
+   const firebaseConfig = {
   apiKey: "AIzaSyDX8BiSqlghdgOj4_zPSyPgATfHVV5DNQI",
   authDomain: "gifts-d8f30.firebaseapp.com",
   projectId: "gifts-d8f30",
@@ -169,149 +192,138 @@
   appId: "1:883903383261:web:dad1742c009ea38bf5fd34",
   measurementId: "G-5JFXH4YG3J"
 };
-  const gifts = [
-    { id: 5170145012310081615, emoji: "💖", name: "Сердце" },
-    { id: 5170233102089322756, emoji: "🧸", name: "Плюшевый мишка" }
-  ];
-  const maxPerGift = 5;
-
-  // 2. Firebase init
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
-  // 3. Telegram auth
-  let userId, userName, userPhoto;
-  function showSnackbar(text) {
-    const sb = document.getElementById("snackbar");
-    sb.textContent = text; sb.className = "show";
-    setTimeout(()=> sb.className="", 3000);
-  }
-  function initTelegram() {
-    const tg = Telegram.WebApp.initDataUnsafe?.user;
-    if (!tg) {
-      showSnackbar("Откройте в Telegram Mini App");
-      throw "Not in TMA";
+    const gifts = [
+      {id:5170145012310081615,emoji:"💖",name:"Сердце"},
+      {id:5170233102089322756,emoji:"🧸",name:"Плюшевый мишка"}
+    ];
+    const maxPerGift = 5;
+    // 2. INIT
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    // 3. SnackBar
+    function showSnackbar(msg) {
+      const sb = document.getElementById("snackbar");
+      sb.textContent = msg;
+      sb.className = "show";
+      setTimeout(()=> sb.className = sb.className.replace("show",""), 3000);
     }
-    userId = tg.id;
-    userName = tg.username ? "@"+tg.username : tg.first_name;
-    userPhoto = tg.photo_url || "https://telegram.org/img/t_logo.png";
-    document.getElementById("profileImg").src = userPhoto;
-    document.getElementById("profileName").textContent = userName;
-    document.getElementById("profileId").textContent = "ID: "+userId;
-    document.getElementById("profileBox").style.display = "";
-  }
-  initTelegram();
-
-  // 4. Save user
-  db.ref("users/"+userId).update({
-    id: userId,
-    name: userName,
-    photo: userPhoto,
-    lastVisit: new Date().toISOString()
-  });
-
-  // 5. History loader
-  function loadHistory() {
-    db.ref("users/"+userId+"/spins").once("value", snap=>{
-      const arr=[];
-      snap.forEach(c=> {
-        const v=c.val();
-        const g=gifts.find(x=>x.id==v.gift);
-        arr.push(`${v.time}: ${g.emoji} ${g.name}`);
+    // 4. TELEGRAM AUTH
+    let userId, userName, userPhoto;
+    function initTG(){
+      const T = Telegram.WebApp;
+      if(!T?.initDataUnsafe?.user){
+        showSnackbar("Откройте в Telegram Mini App");
+        throw "No TMA";
+      }
+      const u = T.initDataUnsafe.user;
+      userId = u.id;
+      userName = u.username? "@"+u.username : u.first_name||"User";
+      userPhoto = u.photo_url || "https://telegram.org/img/t_logo.png";
+      document.getElementById("profileImg").src = userPhoto;
+      document.getElementById("profileName").textContent = userName;
+      document.getElementById("profileId").textContent = "ID: "+userId;
+      document.getElementById("profileBox").style.display="";
+    }
+    initTG();
+    // 5. SAVE USER
+    db.ref("users/"+userId).update({
+      id:userId,name:userName,photo:userPhoto,
+      lastVisit: new Date().toISOString()
+    });
+    // 6. HISTORY
+    function loadHistory(){
+      db.ref("users/"+userId+"/spins").once("value",snap=>{
+        const ul = document.getElementById("historyList");
+        const arr = [];
+        snap.forEach(c=> arr.push(c.val()));
+        ul.innerHTML = arr.length
+          ? arr.map(v=>`<li>${v.time}: ${gifts.find(g=>g.id==v.gift)?.emoji||"🎁"} <b>${gifts.find(g=>g.id==v.gift)?.name}</b></li>`).join("")
+          : "<li>Пока ничего не выиграно</li>";
       });
-      document.getElementById("historyList").innerHTML = arr.length
-        ? arr.map(x=>`<li>${x}</li>`).join("")
-        : "<li>Пока ничего не выиграно</li>";
-    });
-  }
-  loadHistory();
-
-  // 6. Gift counts
-  let availableGifts = [];
-  function refreshGiftCounts(cb) {
-    db.ref("prizes").once("value", snap=>{
-      const counts = snap.val()||{};
-      availableGifts = gifts.filter(g=> (counts[g.id]||0) < maxPerGift);
-      if (!availableGifts.length) {
-        db.ref("prizes").set(null);
-        availableGifts = [...gifts];
-        showSnackbar("Призы обновлены!");
-      }
-      cb();
-    });
-  }
-
-  // 7. Roulette UI
-  const rouletteList = document.getElementById("rouletteList");
-  function fillRoulette() {
-    rouletteList.innerHTML = "";
-    for(let i=0;i<gifts.length*4;i++){
-      const g=gifts[i%gifts.length];
-      const div=document.createElement("div");
-      div.className="item";
-      div.innerHTML=`<div style="font-size:2.2em">${g.emoji}</div><div class="gift-name">${g.name}</div>`;
-      rouletteList.appendChild(div);
     }
-  }
-  fillRoulette();
-
-  // 8. Spin logic
-  const spinBtn = document.getElementById("spinBtn");
-  let spinning=false;
-  spinBtn.onclick = ()=>{
-    if(spinning) return;
-    refreshGiftCounts(()=>{
-      if(!availableGifts.length){
-        showSnackbar("Все призы закончились");
-        return;
+    window.onload = loadHistory;
+    // 7. GIFT COUNTS
+    let availableGifts = [...gifts];
+    function refreshGiftCounts(cb){
+      db.ref("prizes").once("value",snap=>{
+        const counts = {};
+        snap.forEach(c=>counts[c.key]=c.val());
+        availableGifts = gifts.filter(g=> (counts[g.id]||0) < maxPerGift );
+        if(!availableGifts.length){
+          db.ref("prizes").set(null);
+          availableGifts=[...gifts];
+        }
+        cb();
+      });
+    }
+    // 8. ROULETTE
+    const listEl = document.getElementById("rouletteList");
+    let spinning=false,selIdx=0;
+    function fillRoulette(){
+      listEl.innerHTML = "";
+      for(let i=0;i<gifts.length*4;i++){
+        const g = gifts[i%gifts.length];
+        const div = document.createElement("div");
+        div.className="item";
+        div.innerHTML=`<div style="font-size:2.2em">${g.emoji}</div><div class="gift-name">${g.name}</div>`;
+        listEl.appendChild(div);
       }
-      spinning=true; spinBtn.disabled=true;
-      document.getElementById("msgBox").style.display="none";
-      document.getElementById("confirmBtn").style.display="none";
-
-      const winGift = availableGifts[Math.floor(Math.random()*availableGifts.length)];
-      const winIdx = gifts.findIndex(x=>x.id===winGift.id);
-      const rounds = gifts.length*8 + winIdx;
-      const itemW = 76+12;
-      rouletteList.style.transition="none";
-      rouletteList.style.transform="translateX(0)";
-      setTimeout(()=>{
-        rouletteList.style.transition="transform 2.7s cubic-bezier(.11,.57,0,1)";
-        const offset = rounds*itemW - (rouletteList.parentNode.offsetWidth/2) + itemW/2;
-        rouletteList.style.transform=`translateX(${-offset}px)`;
+    }
+    fillRoulette();
+    // 9. SPIN LOGIC
+    document.getElementById("spinBtn").onclick = ()=>{
+      if(spinning) return;
+      refreshGiftCounts(()=>{
+        if(!availableGifts.length){
+          showSnackbar("Все призы закончились, обновляем...");
+          return;
+        }
+        spinning = true;
+        document.getElementById("spinBtn").disabled=true;
+        document.getElementById("msgBox").style.display="none";
+        document.getElementById("confirmBtn").style.display="none";
+        // pick
+        const win = availableGifts[Math.floor(Math.random()*availableGifts.length)];
+        const winBase = gifts.findIndex(g=>g.id===win.id);
+        const rounds = 16 + Math.random()*4|0;
+        selIdx = rounds*gifts.length + winBase;
+        // animate
+        fillRoulette();
+        listEl.style.transition="none"; listEl.style.transform="translateX(0)";
         setTimeout(()=>{
-          spinning=false; spinBtn.disabled=false;
-          Array.from(rouletteList.children).forEach(c=>c.classList.remove("win"));
-          rouletteList.children[rounds].classList.add("win");
-          // show message
-          const msgBox = document.getElementById("msgBox");
-          msgBox.innerHTML = `Вы выиграли <b>${winGift.emoji} ${winGift.name}</b>!<br>
-            Напишите боту <a href="https://t.me/MrFerra" target="_blank">@MrFerra</a>, затем нажмите ниже.`;
-          msgBox.style.display="";
-          document.getElementById("confirmBtn").style.display="";
-          // confetti
-          confetti({ particleCount:100, spread:70 });
-          // save counts & history
-          db.ref("prizes/"+winGift.id).transaction(c=> (c||0)+1);
-          const now = new Date();
-          db.ref("users/"+userId+"/spins").push({
-            gift: winGift.id,
-            time: now.toLocaleString()
-          });
-          db.ref("users/"+userId).update({ lastSpin: now.toISOString() });
-          loadHistory();
-        }, 2800);
-      }, 50);
-    });
-  };
-
-  // 9. Confirm
-  document.getElementById("confirmBtn").onclick = ()=>{
-    db.ref("users/"+userId).update({ confirmed: new Date().toISOString() });
-    document.getElementById("msgBox").innerHTML = "Заявка отмечена! Ожидайте подарка.";
-    document.getElementById("confirmBtn").style.display="none";
-  };
+          const w=76+12;
+          listEl.style.transition="transform 2.7s cubic-bezier(.11,.57,0,1)";
+          const offset = selIdx*w - (listEl.parentNode.offsetWidth/2)+w/2;
+          listEl.style.transform=`translateX(${-offset}px)`;
+          setTimeout(()=>{ // on finish
+            spinning=false;
+            document.getElementById("spinBtn").disabled=false;
+            listEl.children[selIdx].classList.add("win");
+            // confetti
+            confetti({ particleCount:100, spread:70 });
+            // show msg
+            const msg=`Вы выиграли <b>${win.emoji} ${win.name}</b>!<br>
+              Напишите боту <a href="https://t.me/MrFerra" target="_blank">@MrFerra</a> и жмите ниже.`;
+            const mb=document.getElementById("msgBox");
+            mb.innerHTML=msg; mb.style.display="";
+            document.getElementById("confirmBtn").style.display="";
+            // record
+            const now=new Date();
+            db.ref("prizes/"+win.id).transaction(c=> (c||0)+1 );
+            db.ref("users/"+userId).update({ lastSpin:now.toISOString() });
+            db.ref("users/"+userId+"/spins").push({ gift:win.id, time:now.toLocaleString() });
+            loadHistory();
+          }, 2800);
+        },80);
+      });
+    };
+    // 10. CONFIRM
+    document.getElementById("confirmBtn").onclick=()=>{
+      db.ref("users/"+userId).update({ confirmed:new Date().toISOString() });
+      document.getElementById("msgBox").innerHTML="✔ Заявка отмечена, ожидайте подарок!";
+      document.getElementById("confirmBtn").style.display="none";
+      showSnackbar("Подтверждено!");
+    };
   </script>
 </body>
 </html>
-
