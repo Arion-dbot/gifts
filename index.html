@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Case Roulette | Telegram Gifts</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <style>
+    html, body {
+      margin: 0; padding: 0; width: 100vw; height: 100vh;
+      font-family: 'Nunito', 'Poppins', sans-serif;
+      background: linear-gradient(120deg,#212b37 0%,#19202d 100%);
+      color: #fff; min-height: 100vh; overflow-x: hidden;
+    }
+    .container {
+      max-width: 420px; margin: 0 auto; padding: 16px 0;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    h1 { font-size: 2rem; margin-bottom: 16px; text-align: center;}
+    .roulette-wrap {
+      width: 320px; height: 110px; background: #181e28;
+      border-radius: 18px; box-shadow: 0 8px 32px #1115;
+      overflow: hidden; margin: 32px 0 20px 0; position: relative;
+      border: 2px solid #475472;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .roulette-line {
+      width: 120px; height: 110px; background:rgba(255,255,255,0.1);
+      border-left:3px solid #37f4;
+      border-right:3px solid #37f4;
+      position: absolute; left: 50%; transform: translateX(-50%);
+      top:0; z-index:10;
+      pointer-events:none;
+    }
+    .roulette-track {
+      display: flex; flex-direction: row; align-items: center;
+      height: 110px; position: absolute; left: 0; top: 0;
+      will-change: transform;
+      transition: transform 2.5s cubic-bezier(.3,1.9,.6,1);
+    }
+    .prize-card {
+      width: 100px; height: 100px; margin: 0 8px;
+      background: linear-gradient(140deg,#262c3a 50%,#434a61 100%);
+      border-radius: 12px; box-shadow: 0 2px 16px #12152a88;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: 1.3rem; position: relative; color:#fff;
+      border: 2px solid transparent; transition: border 0.2s;
+    }
+    .prize-card.active { border:2px solid #37f4; background:#243b5c;}
+    .prize-emoji { font-size:2.2rem; margin-bottom:4px;}
+    .prize-title { font-size:1.05rem; }
+    .prize-id { font-size:.85rem; opacity:.45; margin-top:2px;}
+    .spin-btn {
+      margin-top: 18px; background: #37f4; color: #181e28;
+      font-size: 1.3rem; font-weight: bold; border: none;
+      border-radius: 12px; padding: 10px 34px; cursor: pointer;
+      box-shadow: 0 4px 16px #37f44444; letter-spacing: .5px;
+      transition: background .2s;
+    }
+    .spin-btn:active { background: #2de;}
+    .win-block {
+      margin: 32px 0 0 0; padding: 22px 20px 16px 20px; background:#1c2535cc;
+      border-radius:16px; box-shadow: 0 2px 14px #151d2e66;
+      display: flex; flex-direction: column; align-items: center;
+      text-align:center; font-size: 1.15rem;
+      max-width: 350px;
+    }
+    .win-gift { font-size: 2.3rem; margin: 6px 0 0 0;}
+    .confirm-btn {
+      margin-top: 16px; background: #2ad9bb; color: #162024;
+      font-size: 1.15rem; font-weight: 600;
+      border: none; border-radius: 10px; padding: 10px 22px; cursor: pointer;
+      box-shadow: 0 2px 10px #2ad9bb33;
+      transition: background .2s;
+    }
+    .confirm-btn:active { background: #1bd; }
+    .footer {
+      margin-top:40px; font-size:.98rem; opacity:.36; text-align:center;
+    }
+    @media (max-width:500px) {
+      .container { padding: 0 0 24px 0;}
+      .roulette-wrap { width:98vw; max-width:352px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎁 Gift Case Roulette</h1>
+    <div class="roulette-wrap">
+      <div class="roulette-track" id="roulette-track"></div>
+      <div class="roulette-line"></div>
+    </div>
+    <button class="spin-btn" id="spin-btn">Крутить бесплатно</button>
+    <div id="win-block" class="win-block" style="display:none"></div>
+    <div class="footer">Powered by <b>Telegram Mini App</b> + Firebase</div>
+  </div>
+
+  <script>
+  // ---- ПРИЗЫ (замени на актуальные ID и эмодзи)
+  const PRIZES = [
+    { id: '5170145012310081615', emoji: '💝', title: 'Сердце',        weight: 2 },
+    { id: '5170233102089322756', emoji: '🧸', title: 'Плюшевый мишка',weight: 1 }
+  ];
+
+  // ---- FIREBASE (замени на свои настройки!)
+const firebaseConfig = {
+  apiKey: "AIzaSyDX8BiSqlghdgOj4_zPSyPgATfHVV5DNQI",
+  authDomain: "gifts-d8f30.firebaseapp.com",
+  projectId: "gifts-d8f30",
+  storageBucket: "gifts-d8f30.firebasestorage.app",
+  messagingSenderId: "883903383261",
+  appId: "1:883903383261:web:dad1742c009ea38bf5fd34",
+  measurementId: "G-5JFXH4YG3J"
+};
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // ---- Telegram WebApp init
+  Telegram.WebApp.ready();
+  const tgUser = Telegram.WebApp.initDataUnsafe.user || {};
+  const userId = tgUser.id || ("dev_" + Math.floor(100000+Math.random()*899999));
+  const username = tgUser.username || 'unknown';
+
+  // ---- Сохраняем вход пользователя
+  async function saveUserSession() {
+    const now = new Date().toISOString();
+    await db.ref('users/' + userId).set({
+      id: userId,
+      username,
+      time: now,
+      lastSpin: null
+    });
+  }
+  saveUserSession();
+
+  // ---- Инициализация рулетки
+  const track = document.getElementById('roulette-track');
+  function fillRoulette(prizes, repeat=14) {
+    // Скопировать призы в случайном порядке N раз, чтобы была красивая анимация
+    let line = [];
+    for(let r=0; r<repeat; r++)
+      line = line.concat(prizes.sort(()=>Math.random()-.5));
+    track.innerHTML = '';
+    line.forEach((p,i) => {
+      const card = document.createElement('div');
+      card.className = 'prize-card';
+      card.innerHTML = `<div class="prize-emoji">${p.emoji}</div>
+        <div class="prize-title">${p.title}</div>
+        <div class="prize-id">${p.id.slice(-6)}</div>`;
+      track.appendChild(card);
+    });
+    return line;
+  }
+
+  // ---- Механика крутки
+  let lastPrize = null, lastPrizeObj = null;
+  const spinBtn = document.getElementById('spin-btn');
+  spinBtn.onclick = async function() {
+    spinBtn.disabled = true;
+    document.getElementById('win-block').style.display = 'none';
+    // Запрещаем спамить
+    let fullLine = fillRoulette(PRIZES, 14);
+
+    // Выбор приза по весу
+    let weighted = [];
+    PRIZES.forEach(pr => { for(let i=0;i<pr.weight;i++) weighted.push(pr); });
+    const prize = weighted[Math.floor(Math.random()*weighted.length)];
+    lastPrize = prize.id; lastPrizeObj = prize;
+
+    // Где выпасть?
+    let prizeIndex = Math.floor(fullLine.length/2) + Math.floor(Math.random()*PRIZES.length);
+    fullLine[prizeIndex] = prize;
+    // Анимация
+    const cardWidth = 116, offset = (cardWidth * prizeIndex) - 110; // центр линии
+    track.style.transition = "none";
+    track.style.transform = `translateX(0px)`;
