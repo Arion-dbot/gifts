@@ -22,6 +22,8 @@
       box-shadow: 0 6px 28px #000a;
       padding: 30px 18px 24px 18px;
       text-align: center;
+      position: relative;
+      overflow: visible;
     }
     .profile {
       display: flex;
@@ -77,9 +79,9 @@
     }
     .roulette-list {
       display: flex;
-      transition: transform 2.6s cubic-bezier(.11,.57,0,1);
-      will-change: transform;
       align-items: center;
+      will-change: transform;
+      transition: transform 2.7s cubic-bezier(.11,.57,0,1);
     }
     .item {
       min-width: 76px;
@@ -138,6 +140,14 @@
       font-weight: 700;
       transition: background .15s, transform .09s;
       margin-bottom: 2px;
+      opacity: 1;
+      pointer-events: all;
+    }
+    .spin-btn:disabled,
+    .spin-btn[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
     }
     .spin-btn:active {
       background: #f6e5a3;
@@ -189,6 +199,36 @@
       margin-bottom: 2px;
       color: #eee;
     }
+    .snackbar {
+      position: fixed;
+      left: 50%;
+      bottom: 32px;
+      transform: translateX(-50%);
+      min-width: 180px;
+      background: #222b;
+      color: #ffd767;
+      font-weight: 600;
+      border-radius: 14px;
+      box-shadow: 0 4px 18px #0006;
+      padding: 13px 34px;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      font-size: 1.09rem;
+      transition: opacity .18s, bottom .18s;
+    }
+    .snackbar.show {
+      opacity: 1;
+      bottom: 64px;
+      pointer-events: all;
+    }
+    #confetti-canvas {
+      pointer-events: none;
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: 9999;
+      display: none;
+    }
     @media (max-width: 480px) {
       .container { max-width: 99vw; margin: 12px 2vw;}
       .roulette { min-height: 72px; }
@@ -219,6 +259,8 @@
     <ul id="historyList"></ul>
   </div>
 </div>
+<canvas id="confetti-canvas"></canvas>
+<div id="snackbar" class="snackbar"></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -227,20 +269,19 @@
 /* ---- 1. CONFIG ---- */
 // Вставь сюда свой firebase config:
 const firebaseConfig = {
-  apiKey: "AIzaSyDX8BiSqlghdgOj4_zPSyPgATfHVV5DNQI",
-  authDomain: "gifts-d8f30.firebaseapp.com",
-  projectId: "gifts-d8f30",
-  storageBucket: "gifts-d8f30.firebasestorage.app",
-  messagingSenderId: "883903383261",
-  appId: "1:883903383261:web:dad1742c009ea38bf5fd34",
-  measurementId: "G-5JFXH4YG3J"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  databaseURL: "YOUR_DB_URL",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_BUCKET",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 // Призы — можно добавить больше
 const gifts = [
   { id: 5170145012310081615, emoji: "💖", name: "Сердце" },
   { id: 5170233102089322756, emoji: "🧸", name: "Плюшевый мишка" }
 ];
-const maxPerGift = 5; // сколько раз можно выдать один и тот же подарок перед сбросом
 
 /* ---- 2. FIREBASE INIT ---- */
 firebase.initializeApp(firebaseConfig);
@@ -256,7 +297,7 @@ function getTelegramUser() {
     userPhoto = tgUser.photo_url ? tgUser.photo_url : "https://telegram.org/img/t_logo.png";
     return tgUser;
   } else {
-    alert("Откройте сайт из Telegram Mini App!");
+    snackbar("Откройте сайт из Telegram Mini App!");
     throw "Not in Telegram Mini App";
   }
 }
@@ -284,24 +325,7 @@ function showProfile() {
 }
 showProfile();
 
-/* ---- 6. GET PRIZE USAGE COUNTS ---- */
-let availableGifts = [...gifts];
-function refreshGiftCounts(cb) {
-  db.ref("prizes").once("value", snap => {
-    let counts = {};
-    snap.forEach(child => counts[child.key] = child.val());
-    // Если какой-то приз исчерпан — исключаем его
-    availableGifts = gifts.filter(g => (counts[g.id] || 0) < maxPerGift);
-    // Если все исчерпаны — сбрасываем
-    if (availableGifts.length === 0) {
-      db.ref("prizes").set(null); // сбросить счётчики
-      availableGifts = [...gifts];
-    }
-    if(cb) cb();
-  });
-}
-
-/* ---- 7. HISTORY ---- */
+/* ---- 6. HISTORY ---- */
 function loadHistory() {
   if (!userId) return;
   db.ref("users/" + userId + "/spins").once("value", snap => {
@@ -317,13 +341,14 @@ function loadHistory() {
 }
 window.onload = loadHistory;
 
-/* ---- 8. ROULETTE ---- */
+/* ---- 7. ROULETTE ---- */
 const rouletteList = document.getElementById("rouletteList");
 let isSpinning = false, selectedIdx = 0;
 
 function fillRoulette(selected=-1) {
   rouletteList.innerHTML = "";
-  for (let i=0; i<gifts.length*4; ++i) {
+  // Подарки всегда повторяются, исчезать не могут
+  for (let i=0; i<gifts.length*14; ++i) { // длинная лента для эффекта
     const gift = gifts[i%gifts.length];
     const div = document.createElement("div");
     div.className = "item" + (i===selected ? " selected" : "");
@@ -331,80 +356,133 @@ function fillRoulette(selected=-1) {
     rouletteList.appendChild(div);
   }
 }
+fillRoulette();
 
-/* ---- 9. SPIN BUTTON ---- */
+/* ---- 8. SPIN BUTTON ---- */
 document.getElementById("spinBtn").onclick = function() {
   if (isSpinning) return;
-  refreshGiftCounts(()=> {
-    if (availableGifts.length === 0) {
-      alert("Все призы временно закончились, попробуйте через минуту!");
-      return;
-    }
-    isSpinning = true;
-    document.getElementById('msgBox').style.display = 'none';
-    document.getElementById('confirmBtn').style.display = 'none';
+  isSpinning = true;
+  this.disabled = true;
+  document.getElementById('msgBox').style.display = 'none';
+  document.getElementById('confirmBtn').style.display = 'none';
 
-    // Всегда выпадает один из доступных подарков
-    const winIdx = Math.floor(Math.random()*availableGifts.length);
-    const gift = availableGifts[winIdx];
-    const winGiftIdx = gifts.findIndex(g=>g.id===gift.id);
+  // 50/50 шанс между двумя подарками
+  const winIdx = Math.random()<0.5 ? 0 : 1;
+  const spinRounds = 8 + Math.floor(Math.random()*5); // короткая лента = круче UX
+  selectedIdx = spinRounds * gifts.length + winIdx;
 
-    const spinRounds = 16 + Math.floor(Math.random()*5);
-    selectedIdx = spinRounds * gifts.length + winGiftIdx;
+  fillRoulette();
+  rouletteList.style.transition = "none";
+  rouletteList.style.transform = "translateX(0)";
 
-    fillRoulette();
-    rouletteList.style.transition = "none";
-    rouletteList.style.transform = "translateX(0)";
+  setTimeout(()=> {
+    rouletteList.style.transition = "transform 2.7s cubic-bezier(.11,.57,0,1)";
+    const width = 76+12; // item+margin*2
+    const offset = selectedIdx*width - (rouletteList.parentNode.offsetWidth/2) + width/2;
+    rouletteList.style.transform = `translateX(${-offset}px)`;
+    setTimeout(()=>{
+      isSpinning = false;
+      document.getElementById("spinBtn").disabled = false;
+      for (let i=0;i<rouletteList.children.length;i++) rouletteList.children[i].classList.remove('win');
+      rouletteList.children[selectedIdx].classList.add('win');
 
-    setTimeout(()=> {
-      rouletteList.style.transition = "transform 2.7s cubic-bezier(.11,.57,0,1)";
-      const width = 76+12; // item+margin*2
-      const offset = selectedIdx*width - (rouletteList.parentNode.offsetWidth/2) + width/2;
-      rouletteList.style.transform = `translateX(${-offset}px)`;
-      // после анимации
-      setTimeout(()=>{
-        isSpinning = false;
-        for (let i=0;i<rouletteList.children.length;i++) rouletteList.children[i].classList.remove('win');
-        rouletteList.children[selectedIdx].classList.add('win');
+      // Конфетти!
+      confetti();
 
-        // Показать выигрыш, записать в Firebase
-        const msg = `Вы выиграли <b>${gift.emoji} ${gift.name}</b>!<br>
+      // Показать выигрыш, записать в Firebase
+      const gift = gifts[winIdx];
+      const msg = `Вы выиграли <b>${gift.emoji} ${gift.name}</b>!<br>
         Чтобы получить приз, <b>напишите любое сообщение боту <a href="https://t.me/MrFerra" target="_blank">@MrFerra</a></b>.<br>
         После этого нажмите кнопку ниже.`;
-        document.getElementById('msgBox').innerHTML = msg;
-        document.getElementById('msgBox').style.display = '';
-        document.getElementById('confirmBtn').style.display = '';
+      document.getElementById('msgBox').innerHTML = msg;
+      document.getElementById('msgBox').style.display = '';
+      document.getElementById('confirmBtn').style.display = '';
 
-        // Счётчик призов
-        db.ref("prizes/"+gift.id).transaction(count=> (count||0)+1);
+      // Запись в базу юзера
+      const now = new Date();
+      db.ref("users/"+userId).update({
+        id: userId,
+        name: userName,
+        photo: userPhoto,
+        lastSpin: now.toISOString()
+      });
+      db.ref("users/"+userId+"/spins").push({
+        gift: gift.id,
+        time: now.toLocaleString()
+      });
+      loadHistory();
 
-        // Запись в базу юзера
-        const now = new Date();
-        db.ref("users/"+userId).update({
-          id: userId,
-          name: userName,
-          photo: userPhoto,
-          lastSpin: now.toISOString()
-        });
-        db.ref("users/"+userId+"/spins").push({
-          gift: gift.id,
-          time: now.toLocaleString()
-        });
-        loadHistory();
-      }, 2750);
-    }, 80);
-  });
+      snackbar("🎉 Вы выиграли приз! Не забудьте связаться с ботом");
+    }, 2750);
+  }, 80);
 };
 
-/* ---- 10. CONFIRM BUTTON ---- */
+/* ---- 9. CONFIRM BUTTON ---- */
 document.getElementById('confirmBtn').onclick = function() {
   db.ref("users/"+userId).update({
     confirmed: new Date().toISOString()
   });
   document.getElementById('msgBox').innerHTML = 'Отлично! Ваша заявка отмечена. Ожидайте получения подарка!';
   document.getElementById('confirmBtn').style.display = 'none';
+  snackbar("Заявка на получение подарка подтверждена");
 };
+
+/* ---- 10. Snackbar ---- */
+function snackbar(msg) {
+  const sb = document.getElementById("snackbar");
+  sb.textContent = msg;
+  sb.className = "snackbar show";
+  setTimeout(()=>sb.className="snackbar",2600);
+}
+
+/* ---- 11. Конфетти ---- */
+function confetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const w = window.innerWidth, h = window.innerHeight;
+  canvas.width = w; canvas.height = h;
+  canvas.style.display = 'block';
+
+  const ctx = canvas.getContext('2d');
+  let confs = [];
+  for (let i=0; i<90; ++i) {
+    confs.push({
+      x: Math.random()*w,
+      y: Math.random()*-h,
+      r: 6+Math.random()*9,
+      d: Math.random()*90,
+      color: `hsl(${Math.random()*360},80%,60%)`,
+      tilt: Math.random()*15-7,
+      tiltAngle: 0,
+      tiltAngleIncremental: (Math.random()*0.07) + 0.05
+    });
+  }
+  let angle = 0;
+  function drawConfetti() {
+    ctx.clearRect(0, 0, w, h);
+    angle += 0.01;
+    for (let i=0; i<confs.length; ++i) {
+      let c = confs[i];
+      c.y += (Math.cos(angle + c.d) + 2 + c.r/5) * 0.8;
+      c.x += Math.sin(angle) * 2;
+      c.tiltAngle += c.tiltAngleIncremental;
+      c.tilt = Math.sin(c.tiltAngle) * 15;
+      ctx.beginPath();
+      ctx.lineWidth = c.r;
+      ctx.strokeStyle = c.color;
+      ctx.moveTo(c.x + c.tilt + c.r/3, c.y);
+      ctx.lineTo(c.x + c.tilt, c.y + c.tilt + c.r*1.2);
+      ctx.stroke();
+    }
+  }
+  let t = 0;
+  function animate() {
+    drawConfetti();
+    t++;
+    if (t < 85) requestAnimationFrame(animate);
+    else canvas.style.display = 'none';
+  }
+  animate();
+}
 </script>
 </body>
 </html>
-
