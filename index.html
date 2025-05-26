@@ -256,7 +256,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script>
+<script>
 /* ---- 1. CONFIG ---- */
 const firebaseConfig = {
   apiKey: "AIzaSyDX8BiSqlghdgOj4_zPSyPgATfHVV5DNQI",
@@ -268,7 +268,7 @@ const firebaseConfig = {
   measurementId: "G-5JFXH4YG3J"
 };
 
-// Только реальные айди!
+// Список только с реальными id
 const gifts = [
   { id: 5170145012310081615, emoji: "💖" },
   { id: 5170233102089322756, emoji: "🧸" }
@@ -360,7 +360,8 @@ function fillRoulette(selected=-1) {
   let cycle = shuffle(gifts);
   let k = 0;
   for (let i=0; i<l; ++i) {
-    slots.push(cycle[k]);
+    // Кладём В НОВЫЙ ОБЪЕКТ, чтобы избежать случайных мутаций!
+    slots.push({ ...cycle[k] });
     k++;
     if (k>=cycle.length) { cycle = shuffle(gifts); k=0; }
   }
@@ -378,12 +379,13 @@ function fillRoulette(selected=-1) {
 document.getElementById("spinBtn").onclick = function() {
   if (isSpinning) return;
   isSpinning = true;
-  // Новая длинная лента
   fillRoulette();
-  // Всегда ровно по центру: winPos = "центр ленты"
+  // Определяем победителя
   const centerIdx = Math.floor(slots.length/2);
-  const winGift = gifts[Math.random()<0.5?0:1];
-  slots[centerIdx] = winGift; // Победитель строго по центру
+  const winGiftIdx = Math.random()<0.5?0:1;
+  const winGift = gifts[winGiftIdx];
+  // Создаём НОВЫЙ ОБЪЕКТ, чтобы избежать скрытых ссылок
+  slots[centerIdx] = { ...winGift };
   selectedIdx = centerIdx;
   rouletteList.style.transition = "none";
   rouletteList.style.transform = "translateX(0)";
@@ -399,14 +401,21 @@ document.getElementById("spinBtn").onclick = function() {
         rouletteList.children[i].classList.remove('win');
         rouletteList.children[i].classList.remove('emoji-bounce');
       }
-      const winElem = rouletteList.children[selectedIdx];
-      winElem.classList.add('win');
-      winElem.classList.add('emoji-bounce');
-      // Сохраняем результат ТОЛЬКО с айди из gifts:
-      saveSpinResult(winGift);
-      // Модалка выигрыша
-      showWinModal(winGift);
-      // Конфетти и обновление истории
+      const winner = slots[selectedIdx];
+      // ---- ОТЛАДКА: Выводим победителя и его id ----
+      console.log('WINNER OBJECT:', winner);
+      console.log('WINNER ID:', winner.id);
+      // ---- Строго сохраняем только ID ----
+      if (typeof winner.id === "number" && gifts.some(g=>g.id === winner.id)) {
+        db.ref("users/"+userId+"/spins").push({
+          gift: winner.id,
+          time: new Date().toLocaleString(),
+          status: "not_claimed"
+        });
+      } else {
+        alert('Ошибка! Некорректный айди подарка: ' + winner.id);
+      }
+      showWinModal(winner);
       confettiEffect();
       loadHistoryCards();
     }, 2100);
@@ -415,24 +424,7 @@ document.getElementById("spinBtn").onclick = function() {
   setTimeout(()=>{document.getElementById("spinBtn").disabled = false;}, 3000);
 };
 
-/* ---- 9. SAVE SPIN RESULT (MAIN FIX HERE!) ---- */
-function saveSpinResult(giftObj) {
-  if (!giftObj || typeof giftObj.id !== 'number') return;
-  const now = new Date();
-  db.ref("users/"+userId).update({
-    id: userId,
-    name: userName,
-    photo: userPhoto,
-    lastSpin: now.toISOString()
-  });
-  db.ref("users/"+userId+"/spins").push({
-    gift: giftObj.id, // <-- всегда только из массива gifts!
-    time: now.toLocaleString(),
-    status: "not_claimed"
-  });
-}
-
-/* ---- 10. WIN MODAL ---- */
+/* ---- 9. WIN MODAL ---- */
 function showWinModal(gift) {
   document.getElementById("modalEmoji").textContent = gift.emoji;
   document.getElementById("modalWinText").innerHTML = `Вы выиграли <b style="color:#ffd700;font-size:1.13em">${gift.emoji}</b>`;
@@ -451,7 +443,7 @@ document.getElementById("confirmWinBtn").onclick = ()=> {
   listenForDelivered();
 };
 
-/* ---- 11. АВТООБНОВЛЕНИЕ СТАТУСА ---- */
+/* ---- 10. АВТООБНОВЛЕНИЕ СТАТУСА ---- */
 let deliveredListener = null;
 function listenForDelivered() {
   if(deliveredListener) deliveredListener.off();
@@ -470,7 +462,7 @@ function listenForDelivered() {
   });
 }
 
-/* ---- 12. ИСТОРИЯ ---- */
+/* ---- 11. ИСТОРИЯ ---- */
 let historyFilter = "all";
 document.getElementById("filterAll").onclick = ()=>{ setHistoryFilter("all"); };
 document.getElementById("filterNotClaimed").onclick = ()=>{ setHistoryFilter("not_claimed"); };
@@ -514,10 +506,10 @@ function loadHistoryCards() {
   });
 }
 
-/* ---- 13. LINK TO BOT в рулетке ---- */
+/* ---- 12. LINK TO BOT в рулетке ---- */
 document.getElementById("unameBtn").onclick = () => window.open("https://t.me/MrFerra", "_blank");
 
-/* ---- 14. CONFETTI ---- */
+/* ---- 13. CONFETTI ---- */
 function confettiEffect() {
   const colors = ["#ffd700", "#ff69b4", "#00e0ca", "#ffe579", "#f68c47", "#74dbef", "#f54555"];
   const canvas = document.getElementById("confetti");
@@ -560,7 +552,7 @@ function confettiEffect() {
   draw();
 }
 
-/* ---- 15. INIT ---- */
+/* ---- 14. INIT ---- */
 fillRoulette();
 </script>
 </body>
