@@ -3,330 +3,188 @@
 <head>
   <meta charset="UTF-8">
   <title>Gift Roulette — TMA</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <link href="https://fonts.googleapis.com/css?family=Russo+One|Montserrat:700,600,400&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <link href="https://fonts.googleapis.com/css?family=Russo+One|Montserrat:600,400&display=swap" rel="stylesheet">
   <style>
-    html,body {
-      background: linear-gradient(120deg, #181e24 0%, #23272f 100%);
-      min-height: 100vh;
-      font-family: 'Montserrat', Arial, sans-serif;
-      margin: 0; padding: 0;
-      color: #fff;
-      font-size: 18px;
-    }
-    #app { min-height: 100vh;}
-    /* -------- SPLASH / TUTORIAL -------- */
-    .splash {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      height: 100vh; width: 100vw; position: fixed; z-index: 99; top:0; left:0; background: #181e24;
-      animation: fadein .7s cubic-bezier(.2,.75,.23,1);
-      transition: opacity .4s;
-    }
-    .splash.hide { opacity:0; pointer-events: none;}
-    .splash-logo { font-size: 3.5rem; margin-bottom: 15px; animation: tada .9s .2s;}
-    .splash-title { font-family: 'Russo One'; font-size: 2.1rem; margin-bottom: 7px; letter-spacing: .05em; }
-    .splash-desc { color: #ffe47a; font-size: 1.13rem; margin-bottom: 29px;}
-    .splash-btn, .tutorial-btn {
-      background: linear-gradient(90deg, #ffe47a, #ffc03e 70%, #ffe47a); color: #181e24; font-weight: 700;
-      font-size: 1.21rem; padding: 13px 42px; border-radius: 22px; border: none; box-shadow: 0 2px 12px #0005;
-      cursor: pointer; transition: .12s; font-family: 'Russo One'; letter-spacing: .08em;
-      margin-top: 15px;
-    }
-    .splash-btn:active, .tutorial-btn:active { background: #ffe7ac;}
-    .tutorial-step { display: none; flex-direction: column; align-items: center; }
-    .tutorial-step.active { display: flex; animation: fadein .46s;}
-    .tutorial-ic { font-size: 2.9em; margin-bottom: 8px; }
-    .tutorial-title { font-size: 1.26em; font-weight: 800; color: #ffe47a; margin-bottom: 10px;}
-    .tutorial-desc { font-size: 1.09em; color: #fff; margin-bottom: 14px; text-align: center; line-height: 1.4;}
-    /* -------- TABBAR -------- */
-    .tabbar {
-      position: fixed; left: 0; bottom: 22px; width: 100vw; z-index: 22; background: #1e232b;
-      display: flex; justify-content: space-around; border-radius: 18px 18px 18px 18px;
-      box-shadow: 0 0 24px #0008, 0 1.5px 24px #fff1 inset;
-      max-width: 420px; margin: 0 auto; left: 50%; transform: translateX(-50%);
-      border: 2px solid #282c37;
-      padding: 3px 0 0 0;
-      animation: fadein .7s;
-    }
-    .tab-btn {
-      flex: 1; display: flex; flex-direction: column; align-items: center; padding: 14px 0 7px 0;
-      color: #bbb; font-size: 1.14rem; font-weight: 700; letter-spacing: .02em; cursor: pointer;
-      outline: none; border: none; background: none; transition: color .13s, text-shadow .14s;
-      font-family: 'Montserrat'; user-select: none; min-width: 70px; position: relative;
-    }
-    .tab-btn.active {
-      color: #ffd700; text-shadow: 0 0 7px #ffe47a55, 0 0 12px #fff3;
-    }
-    .tab-btn-ic { font-size: 2.15em; line-height: 1;}
-    .tab-btn.active:after {
-      content: ""; display: block; position: absolute; left: 50%; bottom: -2px;
-      transform: translateX(-50%); width: 44%; height: 6px; border-radius: 7px;
-      background: linear-gradient(90deg, #fffacd 0%, #ffd700 60%, #fffacd 100%);
-      filter: blur(2px); opacity: .7; box-shadow: 0 0 10px #fff0;
-    }
-    /* -------- MAIN SECTIONS -------- */
-    .main-section { display: none; padding-bottom: 84px; }
-    .main-section.active { display: block; animation: fadein .65s; }
-    .container { max-width: 430px; margin: 42px auto 0 auto; background: #212633; border-radius: 27px;
-      box-shadow: 0 7px 34px #000b, 0 4px 42px #ffd70008 inset; padding: 40px 14px 22px 14px; text-align: center;}
-    /* --------- РУЛЕТКА --------- */
-    .roulette-block { padding-bottom: 26px;}
-    .title { font-family: 'Russo One', Arial, sans-serif; font-size: 2.1rem; letter-spacing: 1.5px; margin-bottom: 22px;
-      background: linear-gradient(90deg, #e4c05c, #ffefb0 60%, #b0a871); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block;}
-    .roulette-wrap {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      margin-bottom: 17px; 
-    }
-    .roulette {
-      background: linear-gradient(120deg,#22293d 75%,#272a33 100%);
-      border: 4px solid #252d39;
-      border-radius: 38px;
-      box-shadow: 0 5px 32px #000c,0 2px 40px #ffd70015 inset;
-      margin: 0 auto 2px auto;
-      padding: 28px 0 18px 0;
-      position: relative; overflow: hidden; min-height: 176px;
-      user-select: none;
-      max-width: 95vw;
-      width: 368px;
-      display: flex; justify-content: center; align-items: center;
-    }
-    .roulette-list { display: flex; will-change: transform; align-items: center; height: 140px;}
-    .marker {
-      position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
-      z-index: 3; width: 0; height: 0;
-      border-left: 23px solid transparent;
-      border-right: 23px solid transparent;
-      border-bottom: 29px solid #ffe268;
-      filter: drop-shadow(0 2px 7px #222a);
-    }
-    .item {
-      min-width: 108px; max-width: 108px; height: 144px; margin: 0 11px;
-      background: linear-gradient(160deg, #2a3140 70%, #23293b 100%);
-      border-radius: 23px; box-shadow: 0 5px 18px #000a,0 0 0 3px #ffd70066;
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
-      border: 3px solid #2e3450;
-      font-size: 2.3rem; position: relative; transition: box-shadow .21s, border .19s, transform .19s, opacity .17s;
-      z-index: 2;
-    }
-    .item .gift-emoji {
-      font-size: 3.5em; position: relative; top: -4px; z-index:3;
-      text-shadow: 0 5px 18px #ffd70033, 0 2px 14px #000b;
-      animation: emojiBounce 1.7s infinite alternate cubic-bezier(.4,.9,.36,1);
-    }
-    .item .gift-name {
-      font-size: 1.16rem; color: #f4d58b; margin-top: 16px; letter-spacing: .03em;
-      font-family: 'Russo One'; font-weight: 700; text-shadow:0 2px 12px #0002;
-    }
-    .item.selected, .item.win {
-      border-color: #ffd700;
-      box-shadow: 0 0 0 6px #ffd70044, 0 0 34px #ffd700a8, 0 5px 18px #000b;
-      animation: giftbounce .95s cubic-bezier(.23,1.2,.23,1), winshadow .92s cubic-bezier(.26,1.2,.23,1);
-      transform: scale(1.14) rotate(-1.8deg);
-    }
-    .item.lost { opacity:.5; }
-    .item.selected::after, .item.win::after {
-      content:""; display:block; position:absolute;left:8px;top:8px;width:92px;height:120px; border-radius:20px;
-      box-shadow: 0 0 20px 7px #fff2;
-      background: radial-gradient(ellipse at 50% 30%, #fff9 12%, #fff0 65%);
-      pointer-events:none; z-index:4; animation: winshine .8s;
-    }
-    /* Background texture */
-    .item::before {
-      content:""; position:absolute;left:0;top:0;width:100%;height:100%;z-index:1; border-radius:22px;
-      background: url("https://www.transparenttextures.com/patterns/cubes.png");
-      opacity:.09;
-    }
-    /* -------- BUTTONS -------- */
-    .spin-btn {
-      margin: 20px auto 0 auto; width: 96%; padding: 19px; border-radius: 23px; background: linear-gradient(90deg, #ffe268, #ffd700 60%, #fffacd 100%);
-      color: #191f26; font-family: 'Russo One', Arial, sans-serif; font-size: 1.32rem; letter-spacing: .08em; border: none; outline: none;
-      box-shadow: 0 3px 20px #ffd70055, 0 3px 24px #0005;
-      cursor: pointer; font-weight: 900; margin-bottom: 2px; transition: background .15s, transform .16s;
-      animation: btnpulse 2.5s infinite alternate;
-    }
-    .spin-btn:active { background: #ffe18c; transform: scale(.96);}
-    .spin-btn:disabled { background: #ffe18c; opacity: .75; cursor: not-allowed;}
-    /* -------- MODAL -------- */
-    .modal-bg {
-      display:none; position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:222;background:#181e24cc;
-      align-items:center;justify-content:center;}
-    .modal-bg.active { display:flex; animation: fadein .24s;}
-    .modal {
-      background: #23283b; border-radius: 23px; box-shadow: 0 6px 55px #000e, 0 0 18px #ffd70020;
-      padding: 34px 26px 32px 26px; max-width: 360px; width:95vw; text-align: center; color: #fff; position:relative;
-      animation: modalpop .21s cubic-bezier(.22,1.2,.23,1);}
-    .modal .big-emoji { font-size: 5.1em; margin-bottom: 15px; animation: tada .68s;}
-    .modal-title { font-size: 1.38em; font-family:'Russo One'; color:#ffe37a; margin-bottom:8px;}
-    .modal-desc {font-size:1.15em;}
-    .modal-btn { background: linear-gradient(90deg, #ffe47a, #ffc03e 70%, #ffe47a); color: #181e24; font-weight: 800; font-size: 1.13rem;
-      padding: 13px 44px; border-radius: 15px; border: none; cursor: pointer; margin-top: 21px;}
-    .modal-btn:active { background: #ffe7ac;}
-    .msg { background: #262c36; border-radius: 12px; margin: 20px 0 14px 0; padding: 19px 12px 19px 12px; font-size: 1.12rem;
-      box-shadow: 0 2px 8px #0004 inset; line-height: 1.57; min-height: 68px; display: none;}
-    .msg.visible { display: block; animation: fadein .38s;}
-    .confirm-btn {
-      background: #4dbe2a; color: #fff; padding: 15px 46px; border-radius: 15px; font-size: 1.18rem; font-weight: 800; margin-top: 19px;
-      border: none; cursor: pointer; transition: background .13s, transform .13s; display: none;
-      box-shadow:0 2px 14px #1b820622;
-    }
-    .confirm-btn:active { background: #278030;}
+    html,body { background: linear-gradient(120deg, #181e24 0%, #23272f 100%); min-height: 100vh;
+      font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; color: #fff;}
+    body { overscroll-behavior-y: contain;}
+    .splash { position:fixed; z-index:999; inset:0; background:linear-gradient(120deg,#23243a,#181e24 90%); display:flex; flex-direction:column; align-items:center; justify-content:center; transition:opacity .7s; }
+    .splash .logo { font-family:'Russo One'; font-size:2.7rem; color:#ffd700; margin-bottom:16px;}
+    .splash .desc { font-size:1.2rem; color:#fff; opacity:.88; margin-bottom:34px;}
+    .splash-btn {background:linear-gradient(90deg,#ffd700 40%,#ffe98b); color:#191f26;font-size:1.16rem; font-family:'Russo One';
+      border:none; border-radius:18px; padding:17px 46px; box-shadow:0 3px 24px #0003; cursor:pointer;transition:.14s;}
+    .splash-btn:active {background:#ffe24b;}
+    .main-wrap {display:none;}
+    .container { max-width: 380px; margin: 24px auto 90px auto; background: #212633;
+      border-radius: 20px; box-shadow: 0 6px 28px #000a; padding: 24px 10px 18px 10px; text-align: center; position: relative;}
+    .profile { display: flex; align-items: center; margin-bottom: 16px; gap: 16px; justify-content: center;}
+    .profile-img { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; border: 2.5px solid #ffe48a; background: #191c22;}
+    .profile-info { text-align: left; font-size: 1.05rem; max-width: 200px; overflow: hidden;}
+    .profile-info .uname { color: #ffe79c; font-family: 'Russo One', Arial, sans-serif; font-size: 1.18rem; margin-bottom: 3px; display: block;}
+    .title { font-family: 'Russo One', Arial, sans-serif; font-size: 2.2rem; letter-spacing: 1.5px; margin-bottom: 4px;
+      background: linear-gradient(90deg, #e4c05c, #ffefb0 60%, #b0a871); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; display: inline-block;}
+    .tabs {position:fixed; left:0; right:0; bottom:0; height:68px; background:#212633e6; box-shadow:0 -2px 14px #0004;
+      display:flex; z-index:20;}
+    .tab-btn {flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:1.2em;
+      color:#bfc3d9; font-family:'Russo One'; cursor:pointer; transition:.13s;}
+    .tab-btn .tab-icon {font-size:1.8em; margin-bottom:1px;}
+    .tab-btn.active {color:#ffd700;}
+    .tab-label {font-size:0.99em; margin-top:1px;}
+    /* Roulette */
+    .roulette { background: #181d22; border: 2px solid #2f3642; border-radius: 24px; box-shadow: 0 4px 18px #0006 inset;
+      margin: 18px 0 18px 0; padding: 22px 0 18px 0; position: relative; overflow: hidden; min-height: 110px; user-select: none;}
+    .roulette-list { display: flex; will-change: transform; align-items: center; transition:transform 2.6s cubic-bezier(.11,.57,0,1);}
+    .item { min-width: 90px; max-width: 90px; height: 90px; margin: 0 10px; background: #242d3a; border-radius: 18px;
+      box-shadow: 0 2px 10px #0007; display: flex; flex-direction: column; justify-content: center; align-items: center;
+      border: 2.5px solid #222b; font-size: 2.1rem; transition: border .12s, box-shadow .15s;}
+    .item.selected, .item.win { border-color: #ffd700; box-shadow: 0 0 24px 4px #ffd70077, 0 2px 10px #000a; z-index: 2;}
+    .item .gift-emoji {font-size:2.6em; transition:.3s cubic-bezier(.33,1.22,.64,1.15);}
+    .item .gift-emoji.bounce {animation:bounceEmoji .65s;}
+    .item .gift-name { font-size: 1.13rem; color: #f4d58b; margin-top: 7px; letter-spacing: .03em;}
+    @keyframes bounceEmoji { 0%{transform:scale(1);} 45%{transform:scale(1.38) rotate(-10deg);} 60%{transform:scale(0.95) rotate(4deg);}
+      75%{transform:scale(1.09);} 100%{transform:scale(1);} }
+    .marker { position: absolute; top: 6px; left: 50%; transform: translateX(-50%); z-index: 2; width: 0; height: 0;
+      border-left: 18px solid transparent; border-right: 18px solid transparent; border-bottom: 25px solid #f5cb4e;
+      filter: drop-shadow(0 2px 6px #222a);}
+    .spin-btn { margin-top: 28px; width: 92%; padding: 18px; border-radius: 20px;
+      background: linear-gradient(90deg, #f5cb4e, #f9e67c 70%, #f5cb4e); color: #191f26;
+      font-family: 'Russo One', Arial, sans-serif; font-size: 1.4rem; letter-spacing: .07em;
+      border: none; outline: none; box-shadow: 0 2px 18px #0006; cursor: pointer; font-weight: 700;
+      transition: background .15s, transform .12s;}
+    .spin-btn:active:not(:disabled), .spin-btn:focus:not(:disabled) {background: #f6e5a3; transform: scale(1.06);}
+    .spin-btn:disabled { opacity: 0.55; cursor:not-allowed;}
+    /* Модальное окно */
+    .modal {position:fixed;z-index:100;inset:0;display:flex;align-items:center;justify-content:center;background:#191e2abb;
+      animation:fadeInModal .4s;}
+    .modal-box {background:#242c3c; padding:34px 26px 30px 26px; border-radius:20px; box-shadow:0 3px 24px #0007; min-width: 240px;
+      display:flex; flex-direction:column; align-items:center;}
+    .modal .gift-emoji {font-size:4.2rem; margin-bottom:12px;}
+    .modal .modal-title {font-size:1.6rem; color:#ffd700; font-family:'Russo One'; margin-bottom:7px;}
+    .modal .modal-msg {font-size:1.11rem; margin-bottom:22px;}
+    .modal .modal-btn {font-size:1.11rem; background:#ffd700; color:#181d22; padding:11px 36px; border:none; border-radius:13px; font-weight:700; margin-top:4px;cursor:pointer;}
+    @keyframes fadeInModal {from{opacity:0;} to{opacity:1;}}
+    .msg { background: #262c36; border-radius: 13px; margin: 22px 0 12px 0; padding: 19px 9px 16px 9px;
+      font-size: 1.14rem; box-shadow: 0 2px 8px #0004 inset; line-height: 1.55; min-height: 60px; display: none;}
+    .msg.visible { display: block; }
+    .confirm-btn { background: #3ab54a; color: #fff; padding: 13px 34px; border-radius: 13px; font-size: 1.15rem;
+      font-weight: 700; margin-top: 14px; border: none; cursor: pointer; transition: background .14s; display: none;}
+    .confirm-btn:active { background: #278030; }
     .confirm-btn.visible { display: inline-block; }
-    .wait-status { margin-top: 15px; color: #eee; font-size: 1.15em; }
-    .wait-dot { display: inline-block; animation: blink 1.1s infinite;}
-    /* -------- HISTORY -------- */
-    .history {
-      background: #242c3e; border-radius: 15px; margin: 30px 0 0 0; padding: 16px 13px 14px 13px; text-align: left; font-size: 1.07rem;
-      color: #ccc; min-height: 60px; box-shadow:0 3px 18px #0007;
-    }
-    .history h4 { margin: 0 0 14px 0; color: #ffe37a; font-size: 1.14rem;}
-    .history-cards { display: flex; flex-direction: column; gap: 15px;}
-    .history-card { background: linear-gradient(120deg,#22293d 70%,#272a33 100%);
-      border-radius: 12px; padding: 12px 10px 13px 15px; display: flex; align-items: center; gap: 18px;
-      box-shadow: 0 2px 12px #ffd70018,0 0 0 3px #ffd70033; border:2.5px solid #ffe26830;
-    }
-    .history-gift { font-size: 2.45em; margin-right:6px;}
-    .history-info { flex:1; }
-    .history-name { font-size: 1.11em; color: #ffe79c; font-weight: 700; margin-bottom: 3px; font-family:'Russo One';}
-    .history-time { font-size: .99em; color: #81e7ff;}
-    .history-status { font-size: 1.02em; color: #81e278; font-weight: 900;}
-    .history-status.wait { color: #ffd864;}
-    .filterbar { margin: 0 0 12px 0; display: flex; gap: 9px;}
-    .filter-btn { background: #262c36; border: none; color: #ffe47a; font-weight: 800; font-size: 1.01em; border-radius: 8px; padding: 7px 14px; cursor: pointer; transition:background .12s;}
-    .filter-btn.active { background: #ffd700; color: #222; }
-    /* -------- PROFILE -------- */
-    .profile { display: flex; align-items: center; margin-bottom: 18px; gap: 16px; justify-content: center;}
-    .profile-img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2.5px solid #ffe48a; background: #191c22;}
-    .profile-info { text-align: left; font-size: 1.13rem; max-width: 220px; overflow: hidden; text-overflow: ellipsis;}
-    .profile-info .uname { color: #ffe79c; font-family: 'Russo One', Arial, sans-serif; font-size: 1.22rem; margin-bottom: 3px; display: block;}
-    .profile-id { font-size: .97em; color: #aaa; }
-    /* --------- SNACKBAR/CONFETTI --------- */
-    .snackbar { visibility: hidden; min-width: 180px; background: #23293b; color: #fff; text-align: center; border-radius: 12px; padding: 13px 22px;
-      position: fixed; z-index: 299; left: 50%; bottom: 44px; transform: translateX(-50%); font-size: 1.12rem; box-shadow: 0 2px 14px #ffd70036;
-      transition: visibility 0s, opacity .38s cubic-bezier(.4,.01,0,1), bottom .23s; opacity: 0; pointer-events: none;}
-    .snackbar.show { visibility: visible; opacity: 1; pointer-events: auto; bottom: 78px;}
-    .confetti { position: fixed; pointer-events: none; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 199; overflow: hidden; }
-    /* SCROLLBAR */
-    ::-webkit-scrollbar { width: 8px;}
-    ::-webkit-scrollbar-thumb { background: #23293b; border-radius: 4px;}
-    /* Анимации */
-    @keyframes fadein { from { opacity: 0;} to { opacity: 1;} }
-    @keyframes tada {
-      0% { transform: scale(1);}
-      10%,20% { transform: scale(0.96) rotate(-6deg);}
-      30%,50%,70%,90% { transform: scale(1.12) rotate(5deg);}
-      40%,60%,80% { transform: scale(1.13) rotate(-7deg);}
-      100% { transform: scale(1);}
-    }
-    @keyframes blink { 0%, 100% {opacity:1;} 40% {opacity:0.5;} }
-    @keyframes modalpop { from {transform: scale(.82); opacity:0;} to {transform: scale(1); opacity:1;} }
-    @keyframes emojiBounce { 0% {transform: scale(1);} 90% {transform: scale(1.19);} 100% {transform: scale(1);} }
-    @keyframes giftbounce { 0% {transform: scale(1.14);} 90% {transform: scale(.93);} 100% {transform: scale(1.14);} }
-    @keyframes winshine { from {opacity:.2;} to {opacity:1;} }
-    @keyframes winshadow { 0% { box-shadow:0 0 0 12px #ffd70044;} 100% { box-shadow:0 0 0 6px #ffd70044;} }
-    @keyframes btnpulse { 0% {box-shadow:0 3px 20px #ffd70055,0 3px 24px #0005;} 100% {box-shadow:0 3px 33px #ffd700a0,0 6px 44px #ffd70015;} }
-    @media (max-width: 700px) {
-      .container {max-width:99vw;}
-      .item, .roulette {min-width:80px;}
-      .item {min-width:80px;max-width:80px;height:112px;}
-      .roulette {width:98vw;max-width:99vw;}
-    }
+    .snackbar { visibility: hidden; min-width: 180px; background: #242d3a; color: #fff; text-align: center;
+      border-radius: 11px; padding: 13px 22px; position: fixed; z-index: 99; left: 50%; bottom: 40px; transform: translateX(-50%);
+      font-size: 1rem; box-shadow: 0 2px 14px #0007; transition: visibility 0s, opacity .35s cubic-bezier(.4,.01,0,1), bottom .23s;
+      opacity: 0; pointer-events: none;}
+    .snackbar.show { visibility: visible; opacity: 1; pointer-events: auto; bottom: 65px;}
+    .history { background: #242d3a; border-radius: 15px; margin-top: 18px; padding: 10px 8px 9px 8px;
+      text-align: left; font-size: 1.05rem; color: #ccc; min-height: 38px; box-shadow: 0 2px 9px #0003;}
+    .history-header {display:flex;align-items:center;gap:12px;}
+    .filter-btn {background:#191f26;color:#ffd700;padding:5px 14px; border-radius:8px; border:none;cursor:pointer; font-size:0.97em;}
+    .filter-btn.active {background:#ffd700;color:#191f26;}
+    .history-cards {margin-top:6px;}
+    .history-card {display:flex;align-items:center;gap:16px; background:#262c36; border-radius:10px;padding:8px 7px 9px 11px;margin-bottom:9px;}
+    .history-emoji {font-size:2.1em;}
+    .history-info {flex:1;}
+    .history-name {font-size:1.11em;font-weight:600;}
+    .history-date {font-size:0.93em; color:#bbb;}
+    .history-status {font-size:0.94em; font-weight:500; color:#62da73; margin-top:1px;}
+    .history-status.wait {color:#ffd700;}
+    .history-status.none {color:#ea8888;}
+    /* Loader / ожидание */
+    .wait-loader {display:inline-block;width:34px;height:34px;position:relative;}
+    .wait-loader div {box-sizing:border-box;display:block;position:absolute;width:34px;height:34px;border:4px solid #ffd700;border-radius:50%;animation:loaderSpin 1.1s linear infinite;border-color:#ffd700 transparent transparent transparent;}
+    .wait-loader div:nth-child(1) {animation-delay:-0.32s;}
+    .wait-loader div:nth-child(2) {animation-delay:-0.16s;}
+    @keyframes loaderSpin {0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+    .confetti { position: fixed; pointer-events: none; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 120;
+      overflow: hidden; pointer-events: none;}
     @media (max-width: 480px) {
-      .container {padding:10px 0 0 0;}
-      .profile-img { width:42px;height:42px;}
-      .tabbar {max-width:100vw;}
-      .item {min-width:70px;max-width:70px;height:82px;}
-      .roulette {min-height:90px;max-width:100vw;}
+      .container { max-width: 99vw; margin: 10px 2vw 90px 2vw;}
+      .roulette { min-height: 70px; }
+      .item { min-width: 67px; max-width: 67px; height: 67px;}
+      .profile-img { width: 39px; height: 39px;}
+      .modal-box {min-width:180px;}
+      .tabs {height:59px;}
+    }
+    @media (max-width:340px) {
+      .item { min-width:50px; max-width:50px; height: 50px;}
+      .roulette {min-height:40px;}
     }
   </style>
+  <!-- Tab icons: emoji (for simplicity) -->
 </head>
 <body>
-<div id="app">
-  <!-- SPLASH -->
-  <div class="splash" id="splashScreen">
-    <!-- Туториал 1 -->
-    <div class="tutorial-step active" id="tutorialStep1">
-      <div class="splash-logo">🎰</div>
-      <div class="splash-title">Gift Roulette</div>
-      <div class="tutorial-desc">Выигрывай уникальные Telegram-подарки в пару кликов!<br>Попробуй удачу в нашей рулетке — каждый спин честный, а подарки выдаёт бот.</div>
-      <button class="tutorial-btn" id="toStep2Btn">Как забрать подарок?</button>
+<div class="splash" id="splashScreen">
+  <div class="logo">🎲 Gift Roulette</div>
+  <div class="desc">Добро пожаловать!<br>Попробуйте удачу и выиграйте призы.<br>Крутите рулетку — всё честно!</div>
+  <button class="splash-btn" id="splashStartBtn">Начать</button>
+</div>
+<div class="main-wrap" id="mainWrap">
+  <div class="container">
+    <div class="profile" id="profileBox" style="display:none;">
+      <img class="profile-img" id="profileImg" src="" alt="User">
+      <div class="profile-info">
+        <span class="uname" id="profileName"></span>
+        <span id="profileId"></span>
+      </div>
     </div>
-    <!-- Туториал 2 -->
-    <div class="tutorial-step" id="tutorialStep2">
-      <div class="tutorial-ic">🧸💖</div>
-      <div class="tutorial-title">Как получить выигрыш?</div>
-      <div class="tutorial-desc">1. Крути рулетку.<br>2. Пиши любое сообщение <b>@MrFerra</b>.<br>3. Получай подарок прямо в Telegram!<br><br><i>Все выигрыши сохраняются в истории.</i></div>
-      <button class="splash-btn" id="splashStartBtn">Начать</button>
-    </div>
-  </div>
-  <!-- MAIN -->
-  <div class="main-section" id="rouletteSection">
-    <div class="container roulette-block">
+    <div id="tab-roulette" class="tab-section">
       <div class="title">Gift Roulette</div>
-      <div class="roulette-wrap">
-        <div class="roulette" id="roulette">
-          <div class="marker"></div>
-          <div class="roulette-list" id="rouletteList"></div>
-        </div>
+      <div class="roulette" id="roulette">
+        <div class="marker"></div>
+        <div class="roulette-list" id="rouletteList"></div>
       </div>
       <button class="spin-btn" id="spinBtn">Крутить бесплатно</button>
-      <div class="msg" id="msgBox"></div>
-      <button class="confirm-btn" id="confirmBtn">Я отправил сообщение боту</button>
-      <div class="wait-status" id="waitStatus" style="display:none;">
-        <span class="wait-dot">●</span> Ожидаем подтверждения от бота...
-      </div>
     </div>
-  </div>
-  <div class="main-section" id="historySection">
-    <div class="container">
-      <div class="title" style="font-size:1.39em;">🏆 Мои выигрыши</div>
-      <div class="filterbar">
-        <button class="filter-btn active" data-filter="all">Все</button>
-        <button class="filter-btn" data-filter="wait">Не получено</button>
-        <button class="filter-btn" data-filter="done">Получено</button>
+    <div id="tab-history" class="tab-section" style="display:none;">
+      <div class="title">Мои выигрыши</div>
+      <div class="history-header">
+        <button class="filter-btn active" id="filterAll">Все</button>
+        <button class="filter-btn" id="filterUnclaimed">Не полученные</button>
       </div>
-      <div class="history">
-        <div class="history-cards" id="historyCards"></div>
-      </div>
+      <div class="history-cards" id="historyList"></div>
     </div>
-  </div>
-  <div class="main-section" id="profileSection">
-    <div class="container" style="padding-top:18px;">
-      <div class="title" style="font-size:1.35em;">⚙️ Мой профиль</div>
-      <div class="profile" id="profileBox" style="margin:18px auto 25px auto;display:none;">
-        <img class="profile-img" id="profileImg" src="" alt="User">
-        <div class="profile-info">
-          <span class="uname" id="profileName"></span>
-          <span class="profile-id" id="profileId"></span>
+    <div id="tab-profile" class="tab-section" style="display:none;">
+      <div class="title">Профиль</div>
+      <div style="margin-top:28px;margin-bottom:12px;">
+        <img class="profile-img" id="profileImg2" src="" alt="User">
+        <div class="profile-info" style="display:inline-block;vertical-align:top;margin-left:10px;">
+          <span class="uname" id="profileName2"></span>
+          <span id="profileId2"></span>
         </div>
       </div>
-      <div style="font-size:.97em;color:#ffe47a;margin-top:8px;">
-        Не забудь написать <b>@MrFerra</b> чтобы получить подарок!
-      </div>
+      <div style="font-size:1.1em;margin-top:16px;color:#ffde87;">Удачи в игре!</div>
+    </div>
+    <div class="msg" id="msgBox"></div>
+    <button class="confirm-btn" id="confirmBtn">Я отправил сообщение боту</button>
+    <div style="text-align:center;margin:16px;">
+      <div id="waitBox" style="display:none;"><span class="wait-loader"><div></div><div></div><div></div><div></div></span>
+      <div id="waitMsg" style="font-size:1.09em;color:#ffe57c;margin-top:8px;">Ожидаем подтверждения...</div></div>
     </div>
   </div>
-  <!-- TabBar -->
-  <div class="tabbar" id="tabBar">
-    <button class="tab-btn active" data-tab="rouletteSection"><span class="tab-btn-ic">🎰</span> <span>Рулетка</span></button>
-    <button class="tab-btn" data-tab="historySection"><span class="tab-btn-ic">🏆</span> <span>Выигрыши</span></button>
-    <button class="tab-btn" data-tab="profileSection"><span class="tab-btn-ic">⚙️</span> <span>Профиль</span></button>
+  <div class="tabs" id="tabBar">
+    <div class="tab-btn active" data-tab="tab-roulette"><span class="tab-icon">🎰</span><span class="tab-label">Рулетка</span></div>
+    <div class="tab-btn" data-tab="tab-history"><span class="tab-icon">🎁</span><span class="tab-label">Выигрыши</span></div>
+    <div class="tab-btn" data-tab="tab-profile"><span class="tab-icon">👤</span><span class="tab-label">Профиль</span></div>
   </div>
-  <!-- МОДАЛ -->
-  <div class="modal-bg" id="modalBg">
-    <div class="modal" id="modalWindow">
-      <div class="big-emoji" id="modalEmoji"></div>
-      <div class="modal-title" id="modalTitle"></div>
-      <div class="modal-desc" id="modalDesc"></div>
-      <button class="modal-btn" id="modalBtn">Ок</button>
-    </div>
-  </div>
-  <div class="snackbar" id="snackbar"></div>
-  <canvas class="confetti" id="confetti"></canvas>
 </div>
+<!-- Модалка для Win -->
+<div id="modalWin" class="modal" style="display:none;">
+  <div class="modal-box">
+    <div class="gift-emoji" id="modalGiftEmoji"></div>
+    <div class="modal-title" id="modalWinTitle">Вы выиграли!</div>
+    <div class="modal-msg" id="modalWinMsg"></div>
+    <button class="modal-btn" id="modalWinOkBtn">OK</button>
+  </div>
+</div>
+<div class="snackbar" id="snackbar"></div>
+<canvas class="confetti" id="confetti"></canvas>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
-/* ---- CONFIG ---- */
 const firebaseConfig = {
   apiKey: "AIzaSyDX8BiSqlghdgOj4_zPSyPgATfHVV5DNQI",
   authDomain: "gifts-d8f30.firebaseapp.com",
@@ -340,10 +198,11 @@ const gifts = [
   { id: 5170145012310081615, emoji: "💖", name: "Сердце" },
   { id: 5170233102089322756, emoji: "🧸", name: "Плюшевый мишка" }
 ];
+
+// Firebase init
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-/* ---- AUTH ---- */
 let userId = null, userName = "", userPhoto = "";
 function getTelegramUser() {
   if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
@@ -357,107 +216,42 @@ function getTelegramUser() {
     throw "Not in Telegram Mini App";
   }
 }
-const tgUser = getTelegramUser();
+
 function saveUserOnEnter() {
   if (!userId) return;
   db.ref("users/" + userId).update({
-    id: userId, name: userName, photo: userPhoto, lastVisit: new Date().toISOString()
+    id: userId,
+    name: userName,
+    photo: userPhoto,
+    lastVisit: new Date().toISOString()
   });
 }
-saveUserOnEnter();
 
-/* ---- NAV ---- */
-const tabs = ["rouletteSection","historySection","profileSection"];
-function showTab(tab) {
-  tabs.forEach(t=> {
-    document.getElementById(t).classList.toggle('active',t===tab);
-    document.querySelector('.tab-btn[data-tab="'+t+'"]').classList.toggle('active',t===tab);
-  });
-  if(tab==="historySection") loadHistory("all");
-  if(tab==="profileSection") showProfile();
-  window.scrollTo(0,0);
-}
-document.querySelectorAll(".tab-btn").forEach(btn=>{
-  btn.onclick = ()=> showTab(btn.getAttribute("data-tab"));
-});
-
-/* ---- SPLASH / TUTORIAL ---- */
-const splash = document.getElementById("splashScreen");
-document.getElementById("toStep2Btn").onclick = ()=>{
-  document.getElementById("tutorialStep1").classList.remove("active");
-  document.getElementById("tutorialStep2").classList.add("active");
-}
-document.getElementById("splashStartBtn").onclick = ()=>{
-  splash.classList.add("hide");
-  setTimeout(()=>{ splash.style.display = "none"; showTab("rouletteSection"); }, 400);
-}
-
-/* ---- SWIPE ---- */
-let touchStartX = 0, touchEndX = 0;
-document.getElementById('app').addEventListener('touchstart',e=>{ if(e.touches.length===1) touchStartX=e.touches[0].clientX;});
-document.getElementById('app').addEventListener('touchend',e=>{
-  touchEndX = e.changedTouches[0].clientX;
-  let dx = touchEndX-touchStartX;
-  if(Math.abs(dx)<70) return;
-  let idx = tabs.findIndex(t=>document.getElementById(t).classList.contains("active"));
-  if(dx<0 && idx<tabs.length-1) showTab(tabs[idx+1]);
-  if(dx>0 && idx>0) showTab(tabs[idx-1]);
-});
-
-/* ---- PROFILE ---- */
 function showProfile() {
   if (!userId) return;
-  document.getElementById('profileImg').src = userPhoto;
-  document.getElementById('profileName').textContent = userName;
-  document.getElementById('profileId').textContent = "ID: " + userId;
+  ['profileImg','profileImg2'].forEach(id=>document.getElementById(id).src=userPhoto);
+  ['profileName','profileName2'].forEach(id=>document.getElementById(id).textContent=userName);
+  ['profileId','profileId2'].forEach(id=>document.getElementById(id).textContent="ID: "+userId);
   document.getElementById('profileBox').style.display = '';
 }
 
-/* ---- HISTORY ---- */
-let allSpinsCache = [];
-function loadHistory(filter="all") {
-  if (!userId) return;
-  db.ref("users/" + userId + "/spins").on("value", snap => {
-    let arr = [];
-    snap.forEach(child => {
-      let v = child.val();
-      v._key = child.key;
-      arr.push(v);
-    });
-    allSpinsCache = arr.reverse();
-    showHistory(filter);
-  });
-}
-function showHistory(filter="all") {
-  let arr = allSpinsCache;
-  if(filter==="wait") arr = arr.filter(x=>!x.done);
-  if(filter==="done") arr = arr.filter(x=>x.done);
-  let el = document.getElementById('historyCards');
-  if(!arr.length) { el.innerHTML='<div style="color:#ffe47a;text-align:center;padding:19px 0 14px 0;">Пока нет выигрышей</div>'; return; }
-  el.innerHTML = arr.map(x=>{
-    let g=gifts.find(g=>g.id==x.gift)||{emoji:"🎁",name:"Подарок"};
-    return `<div class="history-card">
-      <div class="history-gift">${g.emoji}</div>
-      <div class="history-info">
-        <div class="history-name">${g.name}</div>
-        <div class="history-time">${x.time||""}</div>
-        <div class="history-status ${x.done?'':'wait'}">${x.done?'Получено':'Ожидает'}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-document.querySelectorAll(".filter-btn").forEach(btn=>{
-  btn.onclick = ()=>{
-    document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    showHistory(btn.getAttribute("data-filter"));
-  };
-});
+// Splash screen
+document.getElementById("splashStartBtn").onclick = function() {
+  document.getElementById("splashScreen").style.opacity = "0";
+  setTimeout(()=>{
+    document.getElementById("splashScreen").style.display = "none";
+    document.getElementById("mainWrap").style.display = "";
+    // Init Telegram user
+    getTelegramUser();
+    saveUserOnEnter();
+    showProfile();
+    fillRoulette();
+    loadHistory();
+    swipeSupport();
+  }, 600);
+};
 
-/* ---- ROULETTE ---- */
-const rouletteList = document.getElementById("rouletteList");
-let isSpinning = false, selectedIdx = 0;
-let slots = [];
+let isSpinning = false, selectedIdx = 0, slots = [];
 function shuffle(arr) {
   let a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
@@ -466,142 +260,198 @@ function shuffle(arr) {
   }
   return a;
 }
-function fillRoulette(selected=-1, lostIdx=[]) {
+function fillRoulette(selected=-1) {
   slots = [];
-  let l = 18; // оптимальная длина для физики
+  let l = 28;
   let cycle = shuffle(gifts);
   let k = 0;
   for (let i=0; i<l; ++i) {
     slots.push(cycle[k]);
-    k++; if (k>=cycle.length) { cycle = shuffle(gifts); k=0; }
+    k++;
+    if (k>=cycle.length) { cycle = shuffle(gifts); k=0; }
   }
-  rouletteList.innerHTML = "";
+  let rl = document.getElementById("rouletteList");
+  rl.innerHTML = "";
   for (let i=0; i<slots.length; ++i) {
     const gift = slots[i];
     const div = document.createElement("div");
-    div.className = "item";
-    if(i===selected) div.classList.add("selected","win");
-    if(lostIdx.includes(i)) div.classList.add("lost");
+    div.className = "item" + (i===selected ? " selected" : "");
     div.innerHTML = `<div class="gift-emoji">${gift.emoji}</div><div class="gift-name">${gift.name}</div>`;
-    rouletteList.appendChild(div);
+    rl.appendChild(div);
   }
 }
-fillRoulette();
 
-/* ---- Реалистичная рулетка ---- */
 document.getElementById("spinBtn").onclick = function() {
   if (isSpinning) return;
   isSpinning = true;
   document.getElementById('msgBox').classList.remove('visible');
   document.getElementById('confirmBtn').classList.remove('visible');
-  document.getElementById('waitStatus').style.display="none";
-  // Кнопка bounce
-  let btn = document.getElementById("spinBtn");
-  btn.style.transform = "scale(1.08)";
-  setTimeout(()=>{ btn.style.transform = ""; }, 260);
-
-  // Генерируем новую ленту
+  document.getElementById("waitBox").style.display = "none";
   fillRoulette();
-  // Выбор выигрыша (никогда крайние индексы!)
   const winGift = gifts[Math.random()<0.5?0:1];
-  let minPos = 5, maxPos = slots.length-5;
-  let possible = [];
-  for(let i=minPos; i<=maxPos; i++) if(slots[i].id===winGift.id) possible.push(i);
-  let winPos = possible.length ? possible[Math.floor(Math.random()*possible.length)] : Math.floor((minPos+maxPos)/2);
+  let winPos = slots.length - 1;
+  for(let i=slots.length-1; i>=slots.length-8; i--) {
+    if(slots[i].id === winGift.id) { winPos = i; break; }
+  }
   selectedIdx = winPos;
-
-  // Предыдущее положение
-  rouletteList.style.transition = "none";
-  rouletteList.style.transform = "translateX(0)";
-
-  // Эффект ускорения-замедления:
+  let rl = document.getElementById("rouletteList");
+  rl.style.transition = "none";
+  rl.style.transform = "translateX(0)";
   setTimeout(()=> {
-    let width = 108+22;
-    let offset = selectedIdx*width - (rouletteList.parentNode.offsetWidth/2) + width/2;
-    let duration = 2700;
-    // Физика: cubic-bezier, затухание, эффект шейка
-    rouletteList.style.transition = `transform ${duration/1000}s cubic-bezier(.23,1.25,.24,1)`;
-    rouletteList.style.transform = `translateX(${-offset}px)`;
-
-    // Победитель bounce + shake
+    rl.style.transition = "transform 2.4s cubic-bezier(.11,.57,0,1)";
+    const width = 90+20;
+    const offset = selectedIdx*width - (rl.parentNode.offsetWidth/2) + width/2;
+    rl.style.transform = `translateX(${-offset}px)`;
     setTimeout(()=>{
       isSpinning = false;
       document.getElementById("spinBtn").disabled = false;
-      // Карточка выигрыша
-      for (let i=0;i<rouletteList.children.length;i++) {
-        rouletteList.children[i].classList.remove('win','selected','lost');
-        if(i===selectedIdx) rouletteList.children[i].classList.add('win','selected');
-        else rouletteList.children[i].classList.add('lost');
-      }
-      // SHINE / SHAKE
-      rouletteList.children[selectedIdx].style.animation += ', tada .8s';
-
-      // Модалка
-      const gift = slots[selectedIdx];
-      showModal(`${gift.emoji}`, "Вы выиграли!", `<span style="font-size:1.13em;">${gift.name}</span><br>Для получения напишите <b>@MrFerra</b>.<br>Нажмите “Я отправил” после этого.`);
-      // FIREBASE
+      for (let i=0;i<rl.children.length;i++) rl.children[i].classList.remove('win');
+      rl.children[selectedIdx].classList.add('win');
+      let emojiDiv = rl.children[selectedIdx].querySelector('.gift-emoji');
+      emojiDiv.classList.add("bounce");
+      setTimeout(()=>emojiDiv.classList.remove("bounce"),900);
+      showWinModal(slots[selectedIdx]);
+      confettiEffect();
+      // Запись в базу
       const now = new Date();
       db.ref("users/"+userId).update({
-        id: userId, name: userName, photo: userPhoto, lastSpin: now.toISOString()
+        id: userId,
+        name: userName,
+        photo: userPhoto,
+        lastSpin: now.toISOString()
       });
-      let newSpin = db.ref("users/"+userId+"/spins").push();
-      newSpin.set({
-        gift: gift.id,
+      let prizeKey = db.ref("users/"+userId+"/spins").push({
+        gift: slots[selectedIdx].id,
         time: now.toLocaleString(),
-        done: false
-      });
-      loadHistory("all");
-      confettiEffect();
-      // Сообщение и кнопка ниже
-      document.getElementById('msgBox').innerHTML = `Вы выиграли <b>${gift.emoji} ${gift.name}</b>!<br>После того, как напишете <b>@MrFerra</b>, нажмите кнопку ниже.`;
-      document.getElementById('msgBox').classList.add('visible');
-      document.getElementById('confirmBtn').classList.add('visible');
-    }, 1.03*2700);
-  }, 60);
+        status: "wait"
+      }).key;
+      loadHistory();
+      // После закрытия модалки покажем дальше
+      document.getElementById("modalWinOkBtn").onclick = function() {
+        document.getElementById("modalWin").style.display="none";
+        document.getElementById('msgBox').innerHTML = `<b>Чтобы получить приз, <a href="https://t.me/MrFerra" target="_blank">@MrFerra</a></b><br>
+        После этого нажмите кнопку ниже.`;
+        document.getElementById('msgBox').classList.add('visible');
+        document.getElementById('confirmBtn').classList.add('visible');
+        document.getElementById("waitBox").style.display = "none";
+      };
+    }, 2450);
+  }, 80);
   document.getElementById("spinBtn").disabled = true;
-  setTimeout(()=>{document.getElementById("spinBtn").disabled = false;}, 2950);
+  setTimeout(()=>{document.getElementById("spinBtn").disabled = false;}, 3200);
 };
 
-/* ---- CONFIRM ---- */
+function showWinModal(gift){
+  document.getElementById("modalGiftEmoji").textContent = gift.emoji;
+  document.getElementById("modalWinTitle").textContent = "Вы выиграли!";
+  document.getElementById("modalWinMsg").innerHTML = `<b>${gift.name}</b><br>Поздравляем!`;
+  document.getElementById("modalWin").style.display = "flex";
+}
+
 document.getElementById('confirmBtn').onclick = function() {
-  if (!allSpinsCache.length) return;
-  let lastSpin = allSpinsCache[0];
-  db.ref(`users/${userId}/spins/${lastSpin._key}`).update({wait: true});
-  document.getElementById('msgBox').innerHTML = `<span style="font-size:1.15em;">Ждём подтверждения от бота...</span>`;
+  db.ref("users/"+userId+"/spins").once("value", snap=>{
+    let key=null;
+    snap.forEach(child=>{
+      if(child.val().status==="wait") key=child.key;
+    });
+    if(key){
+      db.ref("users/"+userId+"/spins/"+key).update({status:"pending"});
+    }
+  });
+  document.getElementById('msgBox').innerHTML = `<span style="font-size:1.18em;color:#ffd700;">Спасибо!</span><br>Ваша заявка отмечена.<br>Ожидайте выдачу подарка ботом.`;
   document.getElementById('confirmBtn').classList.remove('visible');
-  document.getElementById('waitStatus').style.display="block";
+  document.getElementById("waitBox").style.display = "";
+  waitForPrize();
 };
+function waitForPrize(){
+  // Реалтайм слушаем подтверждение
+  db.ref("users/"+userId+"/spins").on("value", snap=>{
+    snap.forEach(child=>{
+      let v=child.val();
+      if(v.status==="done"){
+        document.getElementById("waitMsg").innerHTML = '<span style="color:#62da73">Приз успешно выдан!<br>Проверьте ваш Telegram 🎉</span>';
+        setTimeout(()=>{document.getElementById("waitBox").style.display="none";},2000);
+      }
+    });
+    loadHistory();
+  });
+}
 
-/* ---- REALTIME CONFIRM ---- */
-db.ref("users/"+userId+"/spins").on("child_changed", function(snap){
-  let spin = snap.val();
-  if(spin.done) {
-    document.getElementById('waitStatus').style.display="none";
-    showSnackbar("Подарок подтверждён! Поздравляем 🎉");
-    loadHistory("all");
+let historyFilter = "all";
+function loadHistory() {
+  if (!userId) return;
+  db.ref("users/" + userId + "/spins").once("value", snap => {
+    let arr = [];
+    snap.forEach(child => {
+      let v = child.val();
+      v.key = child.key;
+      arr.push(v);
+    });
+    arr.reverse();
+    let html = '';
+    arr.filter(item=>historyFilter==='all'||item.status!=='done').forEach(v=>{
+      let g = gifts.find(g=>g.id==v.gift) || gifts[0];
+      let status = v.status==="done"
+        ? '<span class="history-status">Получено</span>'
+        : (v.status==="pending"
+            ? '<span class="history-status wait">Ожидает выдачи</span>'
+            : '<span class="history-status none">Не подтвержден</span>');
+      html += `<div class="history-card">
+        <div class="history-emoji">${g.emoji}</div>
+        <div class="history-info">
+          <div class="history-name">${g.name}</div>
+          <div class="history-date">${v.time||""}</div>
+          ${status}
+        </div>
+      </div>`;
+    });
+    document.getElementById('historyList').innerHTML = html || '<div style="color:#ccc;padding:16px;text-align:center;">Нет выигрышей</div>';
+  });
+}
+document.getElementById('filterAll').onclick = function(){historyFilter='all';this.classList.add('active');document.getElementById('filterUnclaimed').classList.remove('active');loadHistory();};
+document.getElementById('filterUnclaimed').onclick = function(){historyFilter='notdone';this.classList.add('active');document.getElementById('filterAll').classList.remove('active');loadHistory();};
+
+// Tab bar & section logic + swipe
+[...document.querySelectorAll('.tab-btn')].forEach(btn=>{
+  btn.onclick = function() {
+    [...document.querySelectorAll('.tab-btn')].forEach(b=>b.classList.remove('active'));
+    this.classList.add('active');
+    let tab = this.getAttribute('data-tab');
+    [...document.querySelectorAll('.tab-section')].forEach(sec=>sec.style.display='none');
+    document.getElementById(tab).style.display='';
   }
 });
+function swipeSupport(){
+  let wrap = document.querySelector('.container');
+  let startX = null;
+  wrap.addEventListener('touchstart', e=>{startX = e.touches[0].clientX;});
+  wrap.addEventListener('touchmove', e=>{
+    if(startX!==null){
+      let dx = e.touches[0].clientX - startX;
+      if(Math.abs(dx)>60){
+        let tabs = ['tab-roulette','tab-history','tab-profile'];
+        let curTab = tabs.findIndex(t=>document.getElementById(t).style.display!=='none');
+        if(dx<0 && curTab<tabs.length-1){
+          document.querySelectorAll('.tab-btn')[curTab+1].click();
+        } else if(dx>0 && curTab>0){
+          document.querySelectorAll('.tab-btn')[curTab-1].click();
+        }
+        startX = null;
+      }
+    }
+  });
+  wrap.addEventListener('touchend', ()=>{startX=null;});
+}
 
-/* ---- SNACKBAR ---- */
-function showSnackbar(msg, time=2700) {
+/* ---- 10. SNACKBAR ---- */
+function showSnackbar(msg, time=2800) {
   let sb = document.getElementById('snackbar');
   sb.textContent = msg;
   sb.className = "snackbar show";
   setTimeout(()=>{ sb.className = "snackbar"; }, time);
 }
 
-/* ---- MODAL ---- */
-function showModal(emoji, title, desc) {
-  document.getElementById('modalEmoji').textContent = emoji;
-  document.getElementById('modalTitle').innerHTML = title;
-  document.getElementById('modalDesc').innerHTML = desc;
-  document.getElementById('modalBg').classList.add('active');
-}
-document.getElementById('modalBtn').onclick = ()=>{
-  document.getElementById('modalBg').classList.remove('active');
-};
-
-/* ---- CONFETTI ---- */
+/* ---- 11. CONFETTI ---- */
 function confettiEffect() {
   const colors = ["#ffd700", "#ff69b4", "#00e0ca", "#ffe579", "#f68c47", "#74dbef", "#f54555"];
   const canvas = document.getElementById("confetti");
@@ -609,17 +459,17 @@ function confettiEffect() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
   let pieces = [];
-  for (let i = 0; i < 130; i++) {
+  for (let i = 0; i < 110; i++) {
     pieces.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height * 0.1,
-      w: 8 + Math.random() * 11,
-      h: 17 + Math.random() * 8,
+      w: 7 + Math.random() * 8,
+      h: 16 + Math.random() * 6,
       angle: Math.random() * 2 * Math.PI,
       color: colors[Math.floor(Math.random() * colors.length)],
-      vy: 2 + Math.random() * 3.6,
-      vx: (Math.random() - 0.5) * 2.8,
-      va: (Math.random() - 0.5) * 0.11
+      vy: 2 + Math.random() * 3,
+      vx: (Math.random() - 0.5) * 2.5,
+      va: (Math.random() - 0.5) * 0.08
     });
   }
   let frames = 0;
@@ -638,7 +488,7 @@ function confettiEffect() {
       if (p.y > canvas.height) p.y = -20, p.x = Math.random()*canvas.width;
     }
     frames++;
-    if (frames < 100) requestAnimationFrame(draw);
+    if (frames < 85) requestAnimationFrame(draw);
     else ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
   draw();
@@ -646,4 +496,3 @@ function confettiEffect() {
 </script>
 </body>
 </html>
-
