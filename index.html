@@ -1,478 +1,236 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Gift Roulette — CS:GO Style</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <link href="https://fonts.googleapis.com/css?family=Russo+One|Montserrat:600,400&display=swap" rel="stylesheet">
-  <style>
-    html,body {
-      background: linear-gradient(120deg, #181e24 0%, #23272f 100%);
-      min-height: 100vh;
-      font-family: 'Montserrat', sans-serif;
-      margin: 0;
-      padding: 0;
-      color: #fff;
-    }
-    .container {
-      max-width: 400px;
-      margin: 30px auto;
-      background: #212633;
-      border-radius: 20px;
-      box-shadow: 0 6px 28px #000a;
-      padding: 28px 16px 24px 16px;
-      text-align: center;
-      position: relative;
-      overflow: visible;
-    }
-    .profile {
-      display: flex;
-      align-items: center;
-      margin-bottom: 18px;
-      gap: 16px;
-      justify-content: center;
-    }
-    .profile-img {
-      width: 54px; height: 54px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2.5px solid #ffe48a;
-      background: #191c22;
-      margin-right: 6px;
-    }
-    .profile-info {
-      text-align: left;
-      font-size: 1.05rem;
-      max-width: 200px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .profile-info .uname {
-      color: #ffe79c;
-      font-family: 'Russo One', Arial, sans-serif;
-      font-size: 1.18rem;
-      margin-bottom: 3px;
-      display: block;
-      word-break: break-word;
-    }
-    .title {
-      font-family: 'Russo One', Arial, sans-serif;
-      font-size: 2.2rem;
-      letter-spacing: 1.5px;
-      margin-bottom: 4px;
-      background: linear-gradient(90deg, #e4c05c, #ffefb0 60%, #b0a871);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      display: inline-block;
-    }
-    .roulette {
-      background: #181d22;
-      border: 2px solid #2f3642;
-      border-radius: 18px;
-      box-shadow: 0 4px 18px #0006 inset;
-      margin: 18px 0 16px 0;
-      padding: 20px 0 16px 0;
-      position: relative;
-      overflow: hidden;
-      min-height: 88px;
-      user-select: none;
-    }
-    .roulette-list {
-      display: flex;
-      transition: transform 2.5s cubic-bezier(.11,.57,0,1);
-      will-change: transform;
-      align-items: center;
-    }
-    .item {
-      min-width: 76px;
-      max-width: 76px;
-      height: 76px;
-      margin: 0 6px;
-      background: #242d3a;
-      border-radius: 13px;
-      box-shadow: 0 2px 10px #0007;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      border: 2px solid #222b;
-      font-size: 1.5rem;
-      transition: border .12s;
-      position: relative;
-    }
-    .item.selected, .item.win {
-      border-color: #ffd700;
-      box-shadow: 0 0 14px 2px #ffd70055, 0 2px 10px #000a;
-      z-index: 2;
-    }
-    .item .gift-name {
-      font-size: 0.93rem;
-      color: #f4d58b;
-      margin-top: 7px;
-      letter-spacing: .03em;
-    }
-    .marker {
-      position: absolute;
-      top: 6px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 2;
-      width: 0; height: 0;
-      border-left: 15px solid transparent;
-      border-right: 15px solid transparent;
-      border-bottom: 20px solid #f5cb4e;
-      filter: drop-shadow(0 2px 6px #222a);
-    }
-    .spin-btn {
-      margin-top: 20px;
-      width: 90%;
-      padding: 15px;
-      border-radius: 16px;
-      background: linear-gradient(90deg, #f5cb4e, #f9e67c 70%, #f5cb4e);
-      color: #191f26;
-      font-family: 'Russo One', Arial, sans-serif;
-      font-size: 1.3rem;
-      letter-spacing: .07em;
-      border: none;
-      outline: none;
-      box-shadow: 0 2px 14px #0005;
-      cursor: pointer;
-      font-weight: 700;
-      transition: background .15s, transform .09s;
-      margin-bottom: 2px;
-    }
-    .spin-btn:active {
-      background: #f6e5a3;
-      transform: scale(.97);
-    }
-    .msg {
-      background: #262c36;
-      border-radius: 12px;
-      margin: 18px 0 10px 0;
-      padding: 15px 8px 13px 8px;
-      font-size: 1.13rem;
-      box-shadow: 0 2px 8px #0004 inset;
-      line-height: 1.55;
-    }
-    .confirm-btn {
-      background: #3ab54a;
-      color: #fff;
-      padding: 13px 34px;
-      border-radius: 13px;
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-top: 12px;
-      border: none;
-      cursor: pointer;
-      transition: background .14s;
-    }
-    .confirm-btn:active {
-      background: #278030;
-    }
-    .history {
-      background: #242d3a;
-      border-radius: 13px;
-      margin-top: 24px;
-      padding: 13px 10px 9px 10px;
-      text-align: left;
-      font-size: 0.95rem;
-      color: #ccc;
-      min-height: 36px;
-    }
-    .history h4 {
-      margin: 0 0 8px 0;
-      color: #e8c067;
-      font-size: 1.1rem;
-    }
-    .history ul {
-      margin: 0; padding: 0 0 0 14px;
-    }
-    .history li {
-      margin-bottom: 2px;
-      color: #eee;
-    }
-    .snackbar {
-      position: fixed;
-      left: 50%;
-      bottom: 22px;
-      min-width: 190px;
-      background: #242d3a;
-      color: #ffebc7;
-      border-radius: 16px;
-      box-shadow: 0 2px 8px #0008;
-      padding: 12px 25px;
-      font-size: 1.12rem;
-      z-index: 1001;
-      transform: translateX(-50%);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .25s;
-    }
-    .snackbar.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-    /* Конфетти */
-    .confetti {
-      pointer-events: none;
-      position: fixed;
-      left: 0; top: 0; width: 100vw; height: 100vh;
-      z-index: 1002;
-      overflow: hidden;
-      pointer-events: none;
-    }
-    .confetti-piece {
-      position: absolute;
-      width: 12px; height: 28px;
-      opacity: .85;
-      border-radius: 3px;
-      transform: rotate(0deg);
-      will-change: transform, top, left;
-      mix-blend-mode: plus-lighter;
-    }
-    @media (max-width: 480px) {
-      .container { max-width: 99vw; margin: 12px 2vw;}
-      .roulette { min-height: 72px; }
-      .item { min-width: 64px; max-width: 64px; height: 64px;}
-      .profile-img { width: 42px; height: 42px;}
-    }
-  </style>
+<meta charset="UTF-8">
+<title>TMA Gift-Roulette</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ---------- базовые стили ---------- */
+html,body{margin:0;padding:0;min-height:100vh;font-family:'Montserrat',sans-serif;background:linear-gradient(125deg,#181e24 0%,#242c36 100%);color:#fff}
+.container{max-width:380px;margin:26px auto;background:#212633;border-radius:20px;box-shadow:0 6px 26px #000a;padding:26px 18px 24px;text-align:center}
+.title{font-family:'Russo One',sans-serif;font-size:2.2rem;letter-spacing:1.4px;background:linear-gradient(90deg,#e4c05c,#ffefb0 55%,#baa86b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;user-select:none}
+.profile{display:flex;justify-content:center;gap:14px;align-items:center;margin-bottom:16px}
+.profile-img{width:54px;height:54px;border-radius:50%;object-fit:cover;border:3px solid #ffd66f;background:#2b313b}
+.uname{font-family:'Russo One';display:block;font-size:1.15rem;color:#ffe79c;margin-bottom:4px;word-break:break-word}
+#profileId{font-size:.9rem;color:#ccc}
+.roulette{margin:20px 0 18px;background:#181d22;border:2px solid #2e3441;border-radius:18px;position:relative;overflow:hidden;box-shadow:0 4px 18px #0006 inset;min-height:86px}
+.marker{position:absolute;top:6px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-bottom:20px solid #f5cb4e;filter:drop-shadow(0 2px 6px #222a);z-index:3}
+.roulette-list{display:flex;transition:transform 2.6s cubic-bezier(.11,.57,0,1);will-change:transform;align-items:center}
+.item{min-width:76px;max-width:76px;height:76px;margin:0 6px;background:#242d3a;border-radius:13px;border:2px solid #222b;box-shadow:0 2px 10px #0007;display:flex;flex-direction:column;justify-content:center;align-items:center;font-size:1.5rem}
+.item .gift-name{font-size:.9rem;color:#f3d48f;margin-top:6px;letter-spacing:.03em}
+.item.win{border-color:#ffd700;box-shadow:0 0 14px 3px #ffd70055,0 2px 10px #000a;z-index:2}
+/* кнопки */
+.btn{width:90%;padding:15px;margin:0 auto;border:none;border-radius:16px;font-family:'Russo One';font-size:1.25rem;font-weight:700;cursor:pointer;transition:background .15s,transform .1s;box-shadow:0 2px 14px #0005}
+.spin-btn{background:linear-gradient(90deg,#f5cb4e,#f9e67c 70%,#f5cb4e);color:#191f26}
+.spin-btn:active{background:#f6e5a3;transform:scale(.97)}
+.confirm-btn{background:#3ab54a;color:#fff;margin-top:14px}
+.confirm-btn:active{background:#288033;transform:scale(.97)}
+/* сообщения */
+.msg{background:#262c36;border-radius:12px;padding:16px 10px;font-size:1.1rem;box-shadow:0 2px 8px #0004 inset;line-height:1.55;margin-top:18px}
+.snackbar{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);padding:14px 22px;border-radius:12px;color:#fff;font-weight:600;font-size:1rem;opacity:0;pointer-events:none;transition:opacity .4s,transform .4s}
+.snackbar.show{opacity:1;transform:translate(-50%,0)}
+.snackbar.info{background:#4a90e2}.snackbar.error{background:#e85454}.snackbar.success{background:#3ab54a}
+/* history */
+.history{background:#242d3a;border-radius:13px;margin-top:24px;padding:12px 10px;text-align:left;font-size:.93rem;color:#ddd}
+.history h4{margin:0 0 8px;color:#e8c067;font-size:1.1rem}
+.history ul{margin:0;padding-left:16px}
+.history li{margin-bottom:2px;color:#eee;font-size:.9rem}
+@media(max-width:480px){.container{max-width:96vw;margin:12px auto}.item{min-width:64px;max-width:64px;height:64px}.profile-img{width:46px;height:46px}}
+</style>
 </head>
 <body>
 <div class="container">
-  <div class="profile" id="profileBox" style="display:none;">
-    <img class="profile-img" id="profileImg" src="" alt="User">
-    <div class="profile-info">
-      <span class="uname" id="profileName"></span>
+  <div class="profile" id="profileBox" style="display:none">
+    <img id="profileImg" class="profile-img" src="">
+    <div>
+      <span id="profileName" class="uname"></span>
       <span id="profileId"></span>
     </div>
   </div>
   <div class="title">Gift Roulette</div>
+
   <div class="roulette" id="roulette">
     <div class="marker"></div>
     <div class="roulette-list" id="rouletteList"></div>
   </div>
-  <button class="spin-btn" id="spinBtn">Крутить бесплатно</button>
+
+  <button class="btn spin-btn" id="spinBtn">Крутить бесплатно</button>
   <div class="msg" id="msgBox" style="display:none"></div>
-  <button class="confirm-btn" id="confirmBtn" style="display:none">Я отправил сообщение боту</button>
+  <button class="btn confirm-btn" id="confirmBtn" style="display:none">Я уже написал боту</button>
+
   <div class="history" id="historyBox">
     <h4>История выигрышей</h4>
     <ul id="historyList"></ul>
   </div>
 </div>
-<div class="snackbar" id="snackbar"></div>
-<div class="confetti" id="confetti"></div>
 
+<!-- Snackbar -->
+<div id="snackbar" class="snackbar"></div>
+
+<!-- libs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
 <script>
-/* ---- 1. CONFIG ---- */
-const firebaseConfig = {
-  apiKey: "AIzaSyDX8BiSqlghdgOj4_zPSyPgATfHVV5DNQI",
-  authDomain: "gifts-d8f30.firebaseapp.com",
-  projectId: "gifts-d8f30",
-  storageBucket: "gifts-d8f30.firebasestorage.app",
-  messagingSenderId: "883903383261",
-  appId: "1:883903383261:web:dad1742c009ea38bf5fd34",
-  measurementId: "G-5JFXH4YG3J"
-};
+/* ---------- 1. Константы и конфиг ---------- */
+// TODO: YOUR_FIREBASE_CONFIG
+const firebaseConfig = {/* ... */};
+
 const gifts = [
-  { id: 5170145012310081615, emoji: "💖", name: "Сердце" },
-  { id: 5170233102089322756, emoji: "🧸", name: "Плюшевый мишка" }
+  {id:5170145012310081615,emoji:"💖",name:"Сердце"},
+  {id:5170233102089322756,emoji:"🧸",name:"Мишка"}
 ];
-/* ---- 2. FIREBASE INIT ---- */
+const maxPerGift=5;                 // сколько раз можно выдать каждый приз до сброса
+const SPIN_COOLDOWN=2000;           // ms с конца анимации до разрешения следующего спина
+
+/* ---------- 2. Firebase ---------- */
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const db=firebase.database();
 
-/* ---- 3. TELEGRAM AUTH ---- */
-let userId = null, userName = "", userPhoto = "";
-function getTelegramUser() {
-  if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
-    const tgUser = Telegram.WebApp.initDataUnsafe.user;
-    userId = tgUser.id;
-    userName = (tgUser.username ? ("@" + tgUser.username) : tgUser.first_name || "User");
-    userPhoto = tgUser.photo_url ? tgUser.photo_url : "https://telegram.org/img/t_logo.png";
-    return tgUser;
-  } else {
-    showSnackbar("Откройте сайт из Telegram Mini App!"); // мягко
-    throw "Not in Telegram Mini App";
-  }
+/* ---------- 3. Snackbar ---------- */
+function showSnack(text,type='info',ms=2800){
+  const s=document.getElementById('snackbar');
+  s.textContent=text;
+  s.className=`snackbar ${type} show`;
+  setTimeout(()=>s.classList.remove('show'),ms);
 }
-const tgUser = getTelegramUser();
 
-/* ---- 4. SAVE USER IN DB (on enter) ---- */
-function saveUserOnEnter() {
-  if (!userId) return;
-  db.ref("users/" + userId).update({
-    id: userId,
-    name: userName,
-    photo: userPhoto,
-    lastVisit: new Date().toISOString()
-  });
+/* ---------- 4. Telegram auth (or TEST mode) ---------- */
+let userId=null,userName='',userPhoto='';
+const TEST_MODE=false; // ← true для локального теста без Telegram
+if(TEST_MODE){
+  userId=123456789;
+  userName='@TestUser';
+  userPhoto='https://telegram.org/img/t_logo.png';
+}else{
+  const u=Telegram.WebApp?.initDataUnsafe?.user;
+  if(!u){showSnack("Откройте из Telegram!",'error',4000);throw'notTelegram';}
+  userId=u.id;
+  userName=u.username?`@${u.username}`:u.first_name||'User';
+  userPhoto=u.photo_url||'https://telegram.org/img/t_logo.png';
 }
-saveUserOnEnter();
+document.getElementById('profileImg').src=userPhoto;
+document.getElementById('profileName').textContent=userName;
+document.getElementById('profileId').textContent=`ID: ${userId}`;
+document.getElementById('profileBox').style.display='flex';
 
-/* ---- 5. SHOW USER PROFILE ---- */
-function showProfile() {
-  if (!userId) return;
-  document.getElementById('profileImg').src = userPhoto;
-  document.getElementById('profileName').textContent = userName;
-  document.getElementById('profileId').textContent = "ID: " + userId;
-  document.getElementById('profileBox').style.display = '';
-}
-showProfile();
+/* ---- запись юзера при заходе ---- */
+db.ref('users/'+userId).update({
+  id:userId,name:userName,photo:userPhoto,lastVisit:new Date().toISOString()
+});
 
-/* ---- 6. HISTORY ---- */
-function loadHistory() {
-  if (!userId) return;
-  db.ref("users/" + userId + "/spins").once("value", snap => {
-    const arr = [];
-    snap.forEach(child => {
-      const v = child.val();
-      arr.push(`${v.time}: ${gifts.find(g=>g.id==v.gift)?.emoji||'🎁'} <b>${gifts.find(g=>g.id==v.gift)?.name||'Подарок'}</b>${v.confirmed?" <span style='color:#8cff8c'>(подтверждено)</span>":""}`);
+/* ---------- 5. История ---------- */
+function loadHistory(){
+  db.ref(`users/${userId}/spins`).once('value',snap=>{
+    const arr=[];
+    snap.forEach(c=>{
+      const v=c.val();
+      const g=gifts.find(x=>x.id==v.gift);
+      arr.push(`${v.time}: ${g?g.emoji:'🎁'} <b>${g?g.name:'Подарок'}</b>`);
     });
-    document.getElementById('historyList').innerHTML = arr.length
-      ? arr.map(x=>`<li>${x}</li>`).join('')
-      : '<li>Пока ничего не выиграно</li>';
+    document.getElementById('historyList').innerHTML=arr.length?arr.map(x=>`<li>${x}</li>`).join(''):'<li>Пока пусто</li>';
   });
 }
-window.onload = loadHistory;
+window.onload=loadHistory;
 
-/* ---- 7. ROULETTE ---- */
-const rouletteList = document.getElementById("rouletteList");
-let isSpinning = false, selectedIdx = 0;
-
-function fillRoulette(selected=-1) {
-  rouletteList.innerHTML = "";
-  // Показываем подряд эти 2 подарка, много раз
-  for (let i=0; i<gifts.length*12; ++i) {
-    const gift = gifts[i%gifts.length];
-    const div = document.createElement("div");
-    div.className = "item" + (i===selected ? " selected" : "");
-    div.innerHTML = `<div style="font-size:2.2em">${gift.emoji}</div><div class="gift-name">${gift.name}</div>`;
-    rouletteList.appendChild(div);
+/* ---------- 6. Рулетка ---------- */
+const rouletteList=document.getElementById('rouletteList');
+function fillRoulette(){
+  rouletteList.innerHTML='';
+  const loops=6; // визуально длинная лента
+  for(let i=0;i<gifts.length*loops;i++){
+    const g=gifts[i%gifts.length];
+    const d=document.createElement('div');
+    d.className='item';
+    d.innerHTML=`<div style="font-size:2.2em">${g.emoji}</div><div class="gift-name">${g.name}</div>`;
+    rouletteList.appendChild(d);
   }
 }
-
 fillRoulette();
 
-/* ---- 8. SNACKBAR ---- */
-function showSnackbar(text, timeout=2200) {
-  const bar = document.getElementById('snackbar');
-  bar.textContent = text;
-  bar.classList.add('active');
-  setTimeout(()=>bar.classList.remove('active'), timeout);
+/* ---------- 7. счётчики призов ---------- */
+let availGifts=[...gifts];
+function refreshGiftCounts(cb){
+  db.ref('prizes').once('value',snap=>{
+    const used={};snap.forEach(c=>used[c.key]=c.val());
+    availGifts=gifts.filter(g=>(used[g.id]||0)<maxPerGift);
+    if(availGifts.length===0){db.ref('prizes').set(null);availGifts=[...gifts];}
+    cb&&cb();
+  });
 }
 
-/* ---- 9. CONFETTI ---- */
-function showConfetti() {
-  const colors = ['#f5cb4e','#ffe79c','#d5ff8c','#fa6f6f','#8cff8c','#ffd4ff','#88e6ff','#fff'];
-  const confettiDiv = document.getElementById('confetti');
-  confettiDiv.innerHTML = '';
-  for(let i=0;i<38;i++){
-    const c = document.createElement('div');
-    c.className='confetti-piece';
-    c.style.background=colors[Math.floor(Math.random()*colors.length)];
-    c.style.left=(Math.random()*100)+'vw';
-    c.style.top=-(Math.random()*20)+'px';
-    c.style.opacity = 0.77+Math.random()*0.23;
-    c.style.width = (8+Math.random()*10)+'px';
-    c.style.height = (18+Math.random()*16)+'px';
-    c.style.borderRadius = (2+Math.random()*3)+'px';
-    c.style.transform=`rotate(${Math.random()*360}deg)`;
-    confettiDiv.appendChild(c);
-    // Анимация
-    setTimeout(()=>{
-      c.animate([
-        {top: c.style.top, left: c.style.left, transform: c.style.transform, opacity: c.style.opacity},
-        {top:'110vh', left:(parseFloat(c.style.left)+(Math.random()*60-30))+'vw', transform:`rotate(${Math.random()*900}deg)`, opacity:0.1}
-      ],{
-        duration:2200+Math.random()*1000,
-        easing:"cubic-bezier(.3,.75,.38,1)"
-      });
-    },Math.random()*400);
-  }
-  setTimeout(()=>confettiDiv.innerHTML='',3300);
-}
-
-/* ---- 10. SPIN BUTTON ---- */
-const spinBtn = document.getElementById("spinBtn");
-spinBtn.onclick = function() {
-  if (isSpinning) {
-    showSnackbar("Подождите окончания прокрутки");
-    return;
-  }
-  isSpinning = true;
-  spinBtn.disabled = true;
-  spinBtn.style.opacity = 0.6;
-
-  // 50/50 шанс — выбираем 0 или 1
-  const winIdx = Math.random()<0.5?0:1;
-  const spinRounds = 14 + Math.floor(Math.random()*4); // красивое число оборотов
-  selectedIdx = spinRounds * gifts.length + winIdx;
-
-  fillRoulette();
-  rouletteList.style.transition = "none";
-  rouletteList.style.transform = "translateX(0)";
-
-  setTimeout(()=> {
-    rouletteList.style.transition = "transform 2.5s cubic-bezier(.11,.57,0,1)";
-    const width = 76+12;
-    const offset = selectedIdx*width - (rouletteList.parentNode.offsetWidth/2) + width/2;
-    rouletteList.style.transform = `translateX(${-offset}px)`;
-    setTimeout(()=>{
-      isSpinning = false;
-      spinBtn.disabled = false;
-      spinBtn.style.opacity = 1;
-      for (let i=0;i<rouletteList.children.length;i++) rouletteList.children[i].classList.remove('win');
-      rouletteList.children[selectedIdx].classList.add('win');
-      // Выигрыш
-      const gift = gifts[winIdx];
-      showConfetti();
-
-      const msg = `Вы выиграли <b>${gift.emoji} ${gift.name}</b>!<br>
-      Чтобы получить приз, <b>напишите любое сообщение боту <a href="https://t.me/MrFerra" target="_blank">@MrFerra</a></b>.<br>
-      После этого нажмите кнопку ниже.`;
-      document.getElementById('msgBox').innerHTML = msg;
-      document.getElementById('msgBox').style.display = '';
-      document.getElementById('confirmBtn').style.display = '';
-
-      // В БД
-      const now = new Date();
-      const spinRef = db.ref("users/"+userId+"/spins").push();
-      spinRef.set({
-        gift: gift.id,
-        time: now.toLocaleString(),
-        confirmed: false
-      });
-      db.ref("users/"+userId).update({
-        id: userId,
-        name: userName,
-        photo: userPhoto,
-        lastSpin: now.toISOString()
-      });
-      loadHistory();
-      showSnackbar("Выигрыш записан в историю!");
-    }, 2500);
-  }, 70);
+/* ---------- 8. Логика кнопок ---------- */
+let spinning=false,lastSpinEnd=0;
+document.getElementById('spinBtn').onclick=()=>{
+  if(spinning||Date.now()-lastSpinEnd<SPIN_COOLDOWN){showSnack("Подождите...",'info');return;}
+  refreshGiftCounts(()=>startSpin());
 };
 
-/* ---- 11. CONFIRM BUTTON ---- */
-document.getElementById('confirmBtn').onclick = function() {
-  // Подтвердить последний спин
-  db.ref("users/"+userId+"/spins").orderByKey().limitToLast(1).once("value", snap=>{
-    snap.forEach(child=>{
-      child.ref.update({confirmed:true});
-    });
-    db.ref("users/"+userId).update({
-      confirmed: new Date().toISOString()
-    });
-    document.getElementById('msgBox').innerHTML = 'Отлично! Ваша заявка отмечена. Ожидайте получения подарка!';
-    document.getElementById('confirmBtn').style.display = 'none';
-    showSnackbar("Заявка подтверждена!");
-    loadHistory();
+function startSpin(){
+  if(availGifts.length===0){showSnack("Призы закончились, попробуйте позже",'error');return;}
+  spinning=true;
+  document.getElementById('msgBox').style.display='none';
+  document.getElementById('confirmBtn').style.display='none';
+
+  // шанс 50/50
+  const winGift = Math.random()<0.5 ? gifts[0] : gifts[1];
+  const loops=16+Math.floor(Math.random()*5);
+  const winIdxBase=gifts.findIndex(g=>g.id===winGift.id);
+  const finalIdx=loops*gifts.length+winIdxBase;
+
+  rouletteList.style.transition='none';
+  rouletteList.style.transform='translateX(0)';
+  setTimeout(()=>{
+    rouletteList.style.transition='transform 2.7s cubic-bezier(.11,.57,0,1)';
+    const cardW=76+12;
+    const offset=finalIdx*cardW - (rouletteList.parentNode.offsetWidth/2) + cardW/2;
+    rouletteList.style.transform=`translateX(${-offset}px)`;
+    setTimeout(()=>finishSpin(winGift,finalIdx),2750);
+  },60);
+}
+
+function finishSpin(gift,finalIdx){
+  spinning=false;lastSpinEnd=Date.now();
+  [...rouletteList.children].forEach(c=>c.classList.remove('win'));
+  rouletteList.children[finalIdx].classList.add('win');
+  playConfetti();
+
+  // сообщение
+  const msgBox=document.getElementById('msgBox');
+  msgBox.innerHTML=`Вы выиграли <b>${gift.emoji} ${gift.name}</b>!<br>
+    Напишите любое сообщение боту <a href="https://t.me/MrFerra" target="_blank">@MrFerra</a>,<br>
+    затем нажмите кнопку ниже.`;
+  msgBox.style.display='';
+  document.getElementById('confirmBtn').style.display='';
+
+  // запись в БД
+  const now=new Date();
+  db.ref(`prizes/${gift.id}`).transaction(c=>(c||0)+1);
+  db.ref(`users/${userId}`).update({lastSpin:now.toISOString()});
+  db.ref(`users/${userId}/spins`).push({
+    gift:gift.id,time:now.toLocaleString(),unix:now.getTime(),avatar:userPhoto
   });
+  loadHistory();
+}
+
+/* ---------- 9. Confetti ---------- */
+function playConfetti(){
+  const duration=1800,end=Date.now()+duration;
+  (function frame(){
+    confetti({particleCount:16,startVelocity:21,spread:70,origin:{y:0.4}});
+    if(Date.now()<end)requestAnimationFrame(frame);
+  })();
+}
+
+/* ---------- 10. Confirm ---------- */
+document.getElementById('confirmBtn').onclick=()=>{
+  db.ref(`users/${userId}`).update({confirmed:new Date().toISOString()});
+  document.getElementById('msgBox').innerHTML='Запрос отмечен ✅. Подарок скоро будет отправлен!';
+  document.getElementById('confirmBtn').style.display='none';
+  showSnack("Сообщение зафиксировано",'success');
 };
 </script>
 </body>
