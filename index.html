@@ -6,228 +6,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <link href="https://fonts.googleapis.com/css?family=Russo+One|Montserrat:600,400&display=swap" rel="stylesheet">
   <style>
-    html,body {
-      background: linear-gradient(120deg, #181e24 0%, #23272f 100%);
-      min-height: 100vh;
-      font-family: 'Montserrat', sans-serif;
-      margin: 0;
-      padding: 0;
-      color: #fff;
-    }
-    .container {
-      max-width: 380px;
-      margin: 32px auto;
-      background: #212633;
-      border-radius: 20px;
-      box-shadow: 0 6px 28px #000a;
-      padding: 30px 18px 24px 18px;
-      text-align: center;
-      position: relative;
-      overflow: visible;
-    }
-    .profile {
-      display: flex;
-      align-items: center;
-      margin-bottom: 18px;
-      gap: 16px;
-      justify-content: center;
-    }
-    .profile-img {
-      width: 54px; height: 54px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2.5px solid #ffe48a;
-      background: #191c22;
-      margin-right: 6px;
-    }
-    .profile-info {
-      text-align: left;
-      font-size: 1.05rem;
-      max-width: 200px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .profile-info .uname {
-      color: #ffe79c;
-      font-family: 'Russo One', Arial, sans-serif;
-      font-size: 1.18rem;
-      margin-bottom: 3px;
-      display: block;
-      word-break: break-word;
-    }
-    .title {
-      font-family: 'Russo One', Arial, sans-serif;
-      font-size: 2.2rem;
-      letter-spacing: 1.5px;
-      margin-bottom: 4px;
-      background: linear-gradient(90deg, #e4c05c, #ffefb0 60%, #b0a871);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      display: inline-block;
-    }
-    .roulette {
-      background: #181d22;
-      border: 2px solid #2f3642;
-      border-radius: 18px;
-      box-shadow: 0 4px 18px #0006 inset;
-      margin: 18px 0 16px 0;
-      padding: 20px 0 16px 0;
-      position: relative;
-      overflow: hidden;
-      min-height: 88px;
-      user-select: none;
-    }
-    .roulette-list {
-      display: flex;
-      transition: transform 2.8s cubic-bezier(.11,.57,0,1);
-      will-change: transform;
-      align-items: center;
-    }
-    .item {
-      min-width: 76px;
-      max-width: 76px;
-      height: 76px;
-      margin: 0 6px;
-      background: #242d3a;
-      border-radius: 13px;
-      box-shadow: 0 2px 10px #0007;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      border: 2px solid #222b;
-      font-size: 1.5rem;
-      transition: border .12s;
-      position: relative;
-    }
-    .item.selected, .item.win {
-      border-color: #ffd700;
-      box-shadow: 0 0 14px 2px #ffd70055, 0 2px 10px #000a;
-      z-index: 2;
-    }
-    .item .gift-name {
-      font-size: 0.93rem;
-      color: #f4d58b;
-      margin-top: 7px;
-      letter-spacing: .03em;
-    }
-    .marker {
-      position: absolute;
-      top: 6px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 2;
-      width: 0; height: 0;
-      border-left: 15px solid transparent;
-      border-right: 15px solid transparent;
-      border-bottom: 20px solid #f5cb4e;
-      filter: drop-shadow(0 2px 6px #222a);
-    }
-    .spin-btn {
-      margin-top: 20px;
-      width: 90%;
-      padding: 15px;
-      border-radius: 16px;
-      background: linear-gradient(90deg, #f5cb4e, #f9e67c 70%, #f5cb4e);
-      color: #191f26;
-      font-family: 'Russo One', Arial, sans-serif;
-      font-size: 1.3rem;
-      letter-spacing: .07em;
-      border: none;
-      outline: none;
-      box-shadow: 0 2px 14px #0005;
-      cursor: pointer;
-      font-weight: 700;
-      transition: background .15s, transform .09s;
-      margin-bottom: 2px;
-    }
-    .spin-btn:active, .spin-btn:disabled {
-      background: #f6e5a3;
-      transform: scale(.97);
-      opacity: 0.8;
-      cursor: not-allowed;
-    }
-    .msg {
-      background: #262c36;
-      border-radius: 12px;
-      margin: 18px 0 10px 0;
-      padding: 15px 8px 13px 8px;
-      font-size: 1.13rem;
-      box-shadow: 0 2px 8px #0004 inset;
-      line-height: 1.55;
-      min-height: 60px;
-      display: none;
-    }
+    html,body { background: linear-gradient(120deg, #181e24 0%, #23272f 100%);
+      min-height: 100vh; font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; color: #fff;}
+    .container { max-width: 380px; margin: 32px auto; background: #212633; border-radius: 20px;
+      box-shadow: 0 6px 28px #000a; padding: 30px 18px 24px 18px; text-align: center; position: relative;}
+    .profile { display: flex; align-items: center; margin-bottom: 18px; gap: 16px; justify-content: center;}
+    .profile-img { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; border: 2.5px solid #ffe48a; background: #191c22;}
+    .profile-info { text-align: left; font-size: 1.05rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis;}
+    .profile-info .uname { color: #ffe79c; font-family: 'Russo One', Arial, sans-serif; font-size: 1.18rem; margin-bottom: 3px; display: block;}
+    .title { font-family: 'Russo One', Arial, sans-serif; font-size: 2.2rem; letter-spacing: 1.5px; margin-bottom: 4px;
+      background: linear-gradient(90deg, #e4c05c, #ffefb0 60%, #b0a871); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; display: inline-block;}
+    .roulette { background: #181d22; border: 2px solid #2f3642; border-radius: 18px; box-shadow: 0 4px 18px #0006 inset;
+      margin: 18px 0 16px 0; padding: 20px 0 16px 0; position: relative; overflow: hidden; min-height: 88px; user-select: none;}
+    .roulette-list { display: flex; will-change: transform; align-items: center;}
+    .item { min-width: 76px; max-width: 76px; height: 76px; margin: 0 6px; background: #242d3a; border-radius: 13px;
+      box-shadow: 0 2px 10px #0007; display: flex; flex-direction: column; justify-content: center; align-items: center;
+      border: 2px solid #222b; font-size: 1.5rem; transition: border .12s;}
+    .item.selected, .item.win { border-color: #ffd700; box-shadow: 0 0 14px 2px #ffd70055, 0 2px 10px #000a; z-index: 2;}
+    .item .gift-name { font-size: 0.93rem; color: #f4d58b; margin-top: 7px; letter-spacing: .03em;}
+    .marker { position: absolute; top: 6px; left: 50%; transform: translateX(-50%); z-index: 2; width: 0; height: 0;
+      border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 20px solid #f5cb4e;
+      filter: drop-shadow(0 2px 6px #222a);}
+    .spin-btn { margin-top: 20px; width: 90%; padding: 15px; border-radius: 16px;
+      background: linear-gradient(90deg, #f5cb4e, #f9e67c 70%, #f5cb4e); color: #191f26;
+      font-family: 'Russo One', Arial, sans-serif; font-size: 1.3rem; letter-spacing: .07em;
+      border: none; outline: none; box-shadow: 0 2px 14px #0005; cursor: pointer; font-weight: 700;
+      transition: background .15s, transform .09s; margin-bottom: 2px;}
+    .spin-btn:active, .spin-btn:disabled { background: #f6e5a3; transform: scale(.97); opacity: 0.8; cursor: not-allowed;}
+    .msg { background: #262c36; border-radius: 12px; margin: 18px 0 10px 0; padding: 15px 8px 13px 8px;
+      font-size: 1.13rem; box-shadow: 0 2px 8px #0004 inset; line-height: 1.55; min-height: 60px; display: none;}
     .msg.visible { display: block; }
-    .confirm-btn {
-      background: #3ab54a;
-      color: #fff;
-      padding: 13px 34px;
-      border-radius: 13px;
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-top: 12px;
-      border: none;
-      cursor: pointer;
-      transition: background .14s;
-      display: none;
-    }
+    .confirm-btn { background: #3ab54a; color: #fff; padding: 13px 34px; border-radius: 13px; font-size: 1.15rem;
+      font-weight: 700; margin-top: 12px; border: none; cursor: pointer; transition: background .14s; display: none;}
     .confirm-btn:active { background: #278030; }
     .confirm-btn.visible { display: inline-block; }
-    .snackbar {
-      visibility: hidden;
-      min-width: 180px;
-      background: #242d3a;
-      color: #fff;
-      text-align: center;
-      border-radius: 11px;
-      padding: 13px 22px;
-      position: fixed;
-      z-index: 99;
-      left: 50%;
-      bottom: 40px;
-      transform: translateX(-50%);
-      font-size: 1rem;
-      box-shadow: 0 2px 14px #0007;
-      transition: visibility 0s, opacity .35s cubic-bezier(.4,.01,0,1), bottom .23s;
-      opacity: 0;
-      pointer-events: none;
-    }
-    .snackbar.show {
-      visibility: visible;
-      opacity: 1;
-      pointer-events: auto;
-      bottom: 65px;
-    }
-    .history {
-      background: #242d3a;
-      border-radius: 13px;
-      margin-top: 24px;
-      padding: 13px 10px 9px 10px;
-      text-align: left;
-      font-size: 0.95rem;
-      color: #ccc;
-      min-height: 36px;
-    }
-    .history h4 {
-      margin: 0 0 8px 0;
-      color: #e8c067;
-      font-size: 1.1rem;
-    }
-    .history ul {
-      margin: 0; padding: 0 0 0 14px;
-    }
-    .history li {
-      margin-bottom: 2px;
-      color: #eee;
-    }
-    .confetti {
-      position: fixed;
-      pointer-events: none;
-      top: 0; left: 0; width: 100vw; height: 100vh; z-index: 120;
-      overflow: hidden;
-      pointer-events: none;
-    }
+    .snackbar { visibility: hidden; min-width: 180px; background: #242d3a; color: #fff; text-align: center;
+      border-radius: 11px; padding: 13px 22px; position: fixed; z-index: 99; left: 50%; bottom: 40px; transform: translateX(-50%);
+      font-size: 1rem; box-shadow: 0 2px 14px #0007; transition: visibility 0s, opacity .35s cubic-bezier(.4,.01,0,1), bottom .23s;
+      opacity: 0; pointer-events: none;}
+    .snackbar.show { visibility: visible; opacity: 1; pointer-events: auto; bottom: 65px;}
+    .history { background: #242d3a; border-radius: 13px; margin-top: 24px; padding: 13px 10px 9px 10px; text-align: left;
+      font-size: 0.95rem; color: #ccc; min-height: 36px;}
+    .history h4 { margin: 0 0 8px 0; color: #e8c067; font-size: 1.1rem;}
+    .history ul { margin: 0; padding: 0 0 0 14px;}
+    .history li { margin-bottom: 2px; color: #eee;}
+    .confetti { position: fixed; pointer-events: none; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 120;
+      overflow: hidden; pointer-events: none;}
     @media (max-width: 480px) {
       .container { max-width: 99vw; margin: 12px 2vw;}
       .roulette { min-height: 72px; }
@@ -277,10 +102,6 @@ const firebaseConfig = {
 };
 const gifts = [
   { id: 5170145012310081615, emoji: "💖", name: "Сердце" },
-  { id: 5170233102089322756, emoji: "🧸", name: "Плюшевый мишка" },
-  { id: 5170145012310081615, emoji: "💖", name: "Сердце" },
-  { id: 5170145012310081615, emoji: "💖", name: "Сердце" },
-  { id: 5170233102089322756, emoji: "🧸", name: "Плюшевый мишка" },
   { id: 5170233102089322756, emoji: "🧸", name: "Плюшевый мишка" }
 ];
 
@@ -342,15 +163,34 @@ function loadHistory() {
 }
 window.onload = loadHistory;
 
-/* ---- 7. ROULETTE ---- */
+/* ---- 7. INFINITE ROULETTE ---- */
 const rouletteList = document.getElementById("rouletteList");
 let isSpinning = false, selectedIdx = 0;
+let slots = []; // динамическая лента
+
+function shuffle(arr) {
+  let a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 function fillRoulette(selected=-1) {
+  // При каждом спине — новая рандомная лента
+  slots = [];
+  let l = 26; // всегда длинная лента
+  let cycle = shuffle(gifts);
+  let k = 0;
+  for (let i=0; i<l; ++i) {
+    slots.push(cycle[k]);
+    k++;
+    if (k>=cycle.length) { cycle = shuffle(gifts); k=0; }
+  }
   rouletteList.innerHTML = "";
-  // По кругу, много раз, чтобы не было пустых мест
-  for (let i=0; i<28; ++i) {
-    const gift = gifts[i % gifts.length];
+  for (let i=0; i<slots.length; ++i) {
+    const gift = slots[i];
     const div = document.createElement("div");
     div.className = "item" + (i===selected ? " selected" : "");
     div.innerHTML = `<div style="font-size:2.2em">${gift.emoji}</div><div class="gift-name">${gift.name}</div>`;
@@ -365,22 +205,24 @@ document.getElementById("spinBtn").onclick = function() {
   document.getElementById('msgBox').classList.remove('visible');
   document.getElementById('confirmBtn').classList.remove('visible');
 
-  // Честный шанс 50/50 для двух подарков
-  const winIdx = Math.random() < 0.5 ? 0 : 1;
-  // Выбираем нужный индекс в длинной ленте
-  const fullRounds = 12 + Math.floor(Math.random()*5); // случайное число оборотов
-  const itemsCount = gifts.length;
-  selectedIdx = fullRounds * itemsCount + winIdx;
-
+  // Новая рандомная лента с подарками
   fillRoulette();
+
+  // Честный шанс 50/50
+  const winGift = gifts[Math.random()<0.5?0:1];
+  // Найдём ближайший winGift в последних 6 слотах ленты (чтобы всегда красиво останавливалось)
+  let winPos = slots.length - 1;
+  for(let i=slots.length-1; i>=slots.length-8; i--) {
+    if(slots[i].id === winGift.id) { winPos = i; break; }
+  }
+  selectedIdx = winPos;
 
   rouletteList.style.transition = "none";
   rouletteList.style.transform = "translateX(0)";
 
-  // Анимация
   setTimeout(()=> {
     rouletteList.style.transition = "transform 2.8s cubic-bezier(.11,.57,0,1)";
-    const width = 76+12; // item+margin*2
+    const width = 76+12;
     const offset = selectedIdx*width - (rouletteList.parentNode.offsetWidth/2) + width/2;
     rouletteList.style.transform = `translateX(${-offset}px)`;
 
@@ -391,7 +233,7 @@ document.getElementById("spinBtn").onclick = function() {
       rouletteList.children[selectedIdx].classList.add('win');
 
       // Показать выигрыш, записать в Firebase
-      const gift = gifts[winIdx];
+      const gift = slots[selectedIdx];
       const msg = `<span style="font-size:1.2em;font-weight:700;color:#ffe57c;">Поздравляем!</span><br>
       Вы выиграли <b>${gift.emoji} ${gift.name}</b>!<br>
       <span style="color:#9f9;">Чтобы получить приз, <b>напишите любое сообщение боту <a href="https://t.me/MrFerra" target="_blank">@MrFerra</a></b>.</span><br>
@@ -489,3 +331,4 @@ fillRoulette();
 </script>
 </body>
 </html>
+
