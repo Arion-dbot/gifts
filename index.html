@@ -256,7 +256,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>
+  <script>
 /* ---- 1. CONFIG ---- */
 const firebaseConfig = {
   apiKey: "AIzaSyDX8BiSqlghdgOj4_zPSyPgATfHVV5DNQI",
@@ -267,6 +267,8 @@ const firebaseConfig = {
   appId: "1:883903383261:web:dad1742c009ea38bf5fd34",
   measurementId: "G-5JFXH4YG3J"
 };
+
+// Только реальные айди!
 const gifts = [
   { id: 5170145012310081615, emoji: "💖" },
   { id: 5170233102089322756, emoji: "🧸" }
@@ -354,7 +356,6 @@ function shuffle(arr) {
 }
 function fillRoulette(selected=-1) {
   slots = [];
-  // Большая длина для эффекта вечной ленты
   let l = 39;
   let cycle = shuffle(gifts);
   let k = 0;
@@ -380,11 +381,9 @@ document.getElementById("spinBtn").onclick = function() {
   // Новая длинная лента
   fillRoulette();
   // Всегда ровно по центру: winPos = "центр ленты"
-  const visibleCount = Math.floor(document.getElementById('roulette').offsetWidth / 88);
   const centerIdx = Math.floor(slots.length/2);
   const winGift = gifts[Math.random()<0.5?0:1];
-  // Сдвигаем winGift в центр
-  slots[centerIdx] = winGift;
+  slots[centerIdx] = winGift; // Победитель строго по центру
   selectedIdx = centerIdx;
   rouletteList.style.transition = "none";
   rouletteList.style.transform = "translateX(0)";
@@ -403,31 +402,37 @@ document.getElementById("spinBtn").onclick = function() {
       const winElem = rouletteList.children[selectedIdx];
       winElem.classList.add('win');
       winElem.classList.add('emoji-bounce');
-      // Модальное окно выигрыша
-      showWinModal(slots[selectedIdx]);
-      // В БД
-      const now = new Date();
-      db.ref("users/"+userId).update({
-        id: userId,
-        name: userName,
-        photo: userPhoto,
-        lastSpin: now.toISOString()
-      });
-      db.ref("users/"+userId+"/spins").push({
-    gift: slots[selectedIdx].id, // <-- ДОЛЖНО БЫТЬ ИМЕННО ТАК!
-    time: now.toLocaleString(),
-    status: "not_claimed"
-});
-
-      loadHistoryCards();
+      // Сохраняем результат ТОЛЬКО с айди из gifts:
+      saveSpinResult(winGift);
+      // Модалка выигрыша
+      showWinModal(winGift);
+      // Конфетти и обновление истории
       confettiEffect();
+      loadHistoryCards();
     }, 2100);
   }, 70);
   document.getElementById("spinBtn").disabled = true;
   setTimeout(()=>{document.getElementById("spinBtn").disabled = false;}, 3000);
 };
 
-/* ---- 9. МОДАЛЬНОЕ ОКНО ВЫИГРЫША ---- */
+/* ---- 9. SAVE SPIN RESULT (MAIN FIX HERE!) ---- */
+function saveSpinResult(giftObj) {
+  if (!giftObj || typeof giftObj.id !== 'number') return;
+  const now = new Date();
+  db.ref("users/"+userId).update({
+    id: userId,
+    name: userName,
+    photo: userPhoto,
+    lastSpin: now.toISOString()
+  });
+  db.ref("users/"+userId+"/spins").push({
+    gift: giftObj.id, // <-- всегда только из массива gifts!
+    time: now.toLocaleString(),
+    status: "not_claimed"
+  });
+}
+
+/* ---- 10. WIN MODAL ---- */
 function showWinModal(gift) {
   document.getElementById("modalEmoji").textContent = gift.emoji;
   document.getElementById("modalWinText").innerHTML = `Вы выиграли <b style="color:#ffd700;font-size:1.13em">${gift.emoji}</b>`;
@@ -446,7 +451,7 @@ document.getElementById("confirmWinBtn").onclick = ()=> {
   listenForDelivered();
 };
 
-/* ---- 10. АВТООБНОВЛЕНИЕ СТАТУСА ---- */
+/* ---- 11. АВТООБНОВЛЕНИЕ СТАТУСА ---- */
 let deliveredListener = null;
 function listenForDelivered() {
   if(deliveredListener) deliveredListener.off();
@@ -465,7 +470,7 @@ function listenForDelivered() {
   });
 }
 
-/* ---- 11. ИСТОРИЯ ---- */
+/* ---- 12. ИСТОРИЯ ---- */
 let historyFilter = "all";
 document.getElementById("filterAll").onclick = ()=>{ setHistoryFilter("all"); };
 document.getElementById("filterNotClaimed").onclick = ()=>{ setHistoryFilter("not_claimed"); };
@@ -509,10 +514,10 @@ function loadHistoryCards() {
   });
 }
 
-/* ---- 12. LINK TO BOT в рулетке ---- */
+/* ---- 13. LINK TO BOT в рулетке ---- */
 document.getElementById("unameBtn").onclick = () => window.open("https://t.me/MrFerra", "_blank");
 
-/* ---- 13. CONFETTI ---- */
+/* ---- 14. CONFETTI ---- */
 function confettiEffect() {
   const colors = ["#ffd700", "#ff69b4", "#00e0ca", "#ffe579", "#f68c47", "#74dbef", "#f54555"];
   const canvas = document.getElementById("confetti");
@@ -555,7 +560,7 @@ function confettiEffect() {
   draw();
 }
 
-/* ---- 14. INIT ---- */
+/* ---- 15. INIT ---- */
 fillRoulette();
 </script>
 </body>
