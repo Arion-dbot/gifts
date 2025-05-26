@@ -23,6 +23,36 @@
       padding: 30px 18px 24px 18px;
       text-align: center;
     }
+    .profile {
+      display: flex;
+      align-items: center;
+      margin-bottom: 18px;
+      gap: 16px;
+      justify-content: center;
+    }
+    .profile-img {
+      width: 54px; height: 54px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2.5px solid #ffe48a;
+      background: #191c22;
+      margin-right: 6px;
+    }
+    .profile-info {
+      text-align: left;
+      font-size: 1.05rem;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .profile-info .uname {
+      color: #ffe79c;
+      font-family: 'Russo One', Arial, sans-serif;
+      font-size: 1.18rem;
+      margin-bottom: 3px;
+      display: block;
+      word-break: break-word;
+    }
     .title {
       font-family: 'Russo One', Arial, sans-serif;
       font-size: 2.2rem;
@@ -163,11 +193,19 @@
       .container { max-width: 99vw; margin: 12px 2vw;}
       .roulette { min-height: 72px; }
       .item { min-width: 64px; max-width: 64px; height: 64px;}
+      .profile-img { width: 42px; height: 42px;}
     }
   </style>
 </head>
 <body>
 <div class="container">
+  <div class="profile" id="profileBox" style="display:none;">
+    <img class="profile-img" id="profileImg" src="" alt="User">
+    <div class="profile-info">
+      <span class="uname" id="profileName"></span>
+      <span id="profileId"></span>
+    </div>
+  </div>
   <div class="title">Gift Roulette</div>
   <div class="roulette" id="roulette">
     <div class="marker"></div>
@@ -182,7 +220,6 @@
   </div>
 </div>
 
-<!-- Firebase & Telegram Mini Apps SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -198,34 +235,73 @@ const firebaseConfig = {
   appId: "1:883903383261:web:dad1742c009ea38bf5fd34",
   measurementId: "G-5JFXH4YG3J"
 };
+// Призы — можно добавить больше
 const gifts = [
   { id: 5170145012310081615, emoji: "💖", name: "Сердце" },
   { id: 5170233102089322756, emoji: "🧸", name: "Плюшевый мишка" }
 ];
+const maxPerGift = 5; // сколько раз можно выдать один и тот же подарок перед сбросом
+
 /* ---- 2. FIREBASE INIT ---- */
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 /* ---- 3. TELEGRAM AUTH ---- */
-let userId = null, userName = "";
+let userId = null, userName = "", userPhoto = "";
 function getTelegramUser() {
   if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
     const tgUser = Telegram.WebApp.initDataUnsafe.user;
     userId = tgUser.id;
     userName = (tgUser.username ? ("@" + tgUser.username) : tgUser.first_name || "User");
+    userPhoto = tgUser.photo_url ? tgUser.photo_url : "https://telegram.org/img/t_logo.png";
     return tgUser;
   } else {
-    // для теста (ЗАКОММЕНТИРУЙ НА РЕАЛЬНОМ СЕРВЕРЕ!)
-    // userId = 123456789;
-    // userName = "Test User";
-    // return {id:userId, first_name:"Test User"};
     alert("Откройте сайт из Telegram Mini App!");
     throw "Not in Telegram Mini App";
   }
 }
-getTelegramUser();
+const tgUser = getTelegramUser();
 
-/* ---- 4. ПОЛУЧЕНИЕ ИСТОРИИ ---- */
+/* ---- 4. SAVE USER IN DB (on enter) ---- */
+function saveUserOnEnter() {
+  if (!userId) return;
+  db.ref("users/" + userId).update({
+    id: userId,
+    name: userName,
+    photo: userPhoto,
+    lastVisit: new Date().toISOString()
+  });
+}
+saveUserOnEnter();
+
+/* ---- 5. SHOW USER PROFILE ---- */
+function showProfile() {
+  if (!userId) return;
+  document.getElementById('profileImg').src = userPhoto;
+  document.getElementById('profileName').textContent = userName;
+  document.getElementById('profileId').textContent = "ID: " + userId;
+  document.getElementById('profileBox').style.display = '';
+}
+showProfile();
+
+/* ---- 6. GET PRIZE USAGE COUNTS ---- */
+let availableGifts = [...gifts];
+function refreshGiftCounts(cb) {
+  db.ref("prizes").once("value", snap => {
+    let counts = {};
+    snap.forEach(child => counts[child.key] = child.val());
+    // Если какой-то приз исчерпан — исключаем его
+    availableGifts = gifts.filter(g => (counts[g.id] || 0) < maxPerGift);
+    // Если все исчерпаны — сбрасываем
+    if (availableGifts.length === 0) {
+      db.ref("prizes").set(null); // сбросить счётчики
+      availableGifts = [...gifts];
+    }
+    if(cb) cb();
+  });
+}
+
+/* ---- 7. HISTORY ---- */
 function loadHistory() {
   if (!userId) return;
   db.ref("users/" + userId + "/spins").once("value", snap => {
@@ -239,8 +315,9 @@ function loadHistory() {
       : '<li>Пока ничего не выиграно</li>';
   });
 }
+window.onload = loadHistory;
 
-/* ---- 5. РУЛЕТКА ---- */
+/* ---- 8. ROULETTE ---- */
 const rouletteList = document.getElementById("rouletteList");
 let isSpinning = false, selectedIdx = 0;
 
@@ -255,62 +332,71 @@ function fillRoulette(selected=-1) {
   }
 }
 
-fillRoulette();
-
-/* ---- 6. КНОПКА КРУТИТЬ ---- */
+/* ---- 9. SPIN BUTTON ---- */
 document.getElementById("spinBtn").onclick = function() {
   if (isSpinning) return;
-  isSpinning = true;
-  document.getElementById('msgBox').style.display = 'none';
-  document.getElementById('confirmBtn').style.display = 'none';
+  refreshGiftCounts(()=> {
+    if (availableGifts.length === 0) {
+      alert("Все призы временно закончились, попробуйте через минуту!");
+      return;
+    }
+    isSpinning = true;
+    document.getElementById('msgBox').style.display = 'none';
+    document.getElementById('confirmBtn').style.display = 'none';
 
-  // Рандом выигрышного подарка
-  const winIdx = Math.floor(Math.random()*gifts.length);
-  const spinRounds = 16 + Math.floor(Math.random()*5);
-  selectedIdx = spinRounds * gifts.length + winIdx;
+    // Всегда выпадает один из доступных подарков
+    const winIdx = Math.floor(Math.random()*availableGifts.length);
+    const gift = availableGifts[winIdx];
+    const winGiftIdx = gifts.findIndex(g=>g.id===gift.id);
 
-  fillRoulette();
-  rouletteList.style.transition = "none";
-  rouletteList.style.transform = "translateX(0)";
+    const spinRounds = 16 + Math.floor(Math.random()*5);
+    selectedIdx = spinRounds * gifts.length + winGiftIdx;
 
-  setTimeout(()=> {
-    rouletteList.style.transition = "transform 2.7s cubic-bezier(.11,.57,0,1)";
-    const width = 76+12; // item+margin*2
-    const offset = selectedIdx*width - (rouletteList.parentNode.offsetWidth/2) + width/2;
-    rouletteList.style.transform = `translateX(${-offset}px)`;
-    // после анимации
-    setTimeout(()=>{
-      isSpinning = false;
-      // выделить выигрышный
-      for (let i=0;i<rouletteList.children.length;i++) rouletteList.children[i].classList.remove('win');
-      rouletteList.children[selectedIdx].classList.add('win');
+    fillRoulette();
+    rouletteList.style.transition = "none";
+    rouletteList.style.transform = "translateX(0)";
 
-      // Показать выигрыш, записать в Firebase
-      const gift = gifts[winIdx];
-      const msg = `Вы выиграли <b>${gift.emoji} ${gift.name}</b>!<br>
-      Чтобы получить приз, <b>напишите любое сообщение боту <a href="https://t.me/MrFerra" target="_blank">@MrFerra</a></b>.<br>
-      После этого нажмите кнопку ниже.`;
-      document.getElementById('msgBox').innerHTML = msg;
-      document.getElementById('msgBox').style.display = '';
-      document.getElementById('confirmBtn').style.display = '';
+    setTimeout(()=> {
+      rouletteList.style.transition = "transform 2.7s cubic-bezier(.11,.57,0,1)";
+      const width = 76+12; // item+margin*2
+      const offset = selectedIdx*width - (rouletteList.parentNode.offsetWidth/2) + width/2;
+      rouletteList.style.transform = `translateX(${-offset}px)`;
+      // после анимации
+      setTimeout(()=>{
+        isSpinning = false;
+        for (let i=0;i<rouletteList.children.length;i++) rouletteList.children[i].classList.remove('win');
+        rouletteList.children[selectedIdx].classList.add('win');
 
-      // Запись в базу
-      const now = new Date();
-      db.ref("users/"+userId).update({
-        id: userId,
-        name: userName,
-        lastSpin: now.toISOString()
-      });
-      db.ref("users/"+userId+"/spins").push({
-        gift: gift.id,
-        time: now.toLocaleString()
-      });
-      loadHistory();
-    }, 2750);
-  }, 80);
+        // Показать выигрыш, записать в Firebase
+        const msg = `Вы выиграли <b>${gift.emoji} ${gift.name}</b>!<br>
+        Чтобы получить приз, <b>напишите любое сообщение боту <a href="https://t.me/MrFerra" target="_blank">@MrFerra</a></b>.<br>
+        После этого нажмите кнопку ниже.`;
+        document.getElementById('msgBox').innerHTML = msg;
+        document.getElementById('msgBox').style.display = '';
+        document.getElementById('confirmBtn').style.display = '';
+
+        // Счётчик призов
+        db.ref("prizes/"+gift.id).transaction(count=> (count||0)+1);
+
+        // Запись в базу юзера
+        const now = new Date();
+        db.ref("users/"+userId).update({
+          id: userId,
+          name: userName,
+          photo: userPhoto,
+          lastSpin: now.toISOString()
+        });
+        db.ref("users/"+userId+"/spins").push({
+          gift: gift.id,
+          time: now.toLocaleString()
+        });
+        loadHistory();
+      }, 2750);
+    }, 80);
+  });
 };
 
-/* ---- 7. КНОПКА "Я отправил" ---- */
+/* ---- 10. CONFIRM BUTTON ---- */
 document.getElementById('confirmBtn').onclick = function() {
   db.ref("users/"+userId).update({
     confirmed: new Date().toISOString()
@@ -318,9 +404,7 @@ document.getElementById('confirmBtn').onclick = function() {
   document.getElementById('msgBox').innerHTML = 'Отлично! Ваша заявка отмечена. Ожидайте получения подарка!';
   document.getElementById('confirmBtn').style.display = 'none';
 };
-
-/* ---- 8. Старт загрузки ---- */
-window.onload = loadHistory;
 </script>
 </body>
 </html>
+
