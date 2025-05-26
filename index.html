@@ -268,182 +268,130 @@ const firebaseConfig = {
   measurementId: "G-5JFXH4YG3J"
 };
 
-// Список только с реальными id
+// id теперь СТРОКА!
 const gifts = [
-  { id: 5170145012310081615, emoji: "💖" },
-  { id: 5170233102089322756, emoji: "🧸" }
+  { id: "5170145012310081615", emoji: "💖" },
+  { id: "5170233102089322756", emoji: "🧸" }
 ];
 
-/* ---- 2. FIREBASE INIT ---- */
+/* ---- 2. FIREBASE ---- */
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-/* ---- 3. TELEGRAM AUTH ---- */
-let userId = null, userName = "", userPhoto = "";
-function getTelegramUser() {
-  if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
-    const tgUser = Telegram.WebApp.initDataUnsafe.user;
-    userId = tgUser.id;
-    userName = (tgUser.username ? ("@" + tgUser.username) : tgUser.first_name || "User");
-    userPhoto = tgUser.photo_url ? tgUser.photo_url : "https://telegram.org/img/t_logo.png";
-    return tgUser;
-  } else {
-    alert("Откройте сайт из Telegram Mini App!");
-    throw "Not in Telegram Mini App";
-  }
-}
-const tgUser = getTelegramUser();
-
-/* ---- 4. SAVE USER IN DB (on enter) ---- */
-function saveUserOnEnter() {
-  if (!userId) return;
-  db.ref("users/" + userId).update({
-    id: userId,
-    name: userName,
-    photo: userPhoto,
-    lastVisit: new Date().toISOString()
-  });
-}
-saveUserOnEnter();
-
-/* ---- 5. PROFILE ---- */
-function showProfile() {
-  document.getElementById('profileImg').src = userPhoto;
-  document.getElementById('profileName').textContent = userName;
-  document.getElementById('profileId').textContent = "ID: " + userId;
-}
-showProfile();
-
-/* ---- 6. NAVIGATION ---- */
-const tabs = ["tab-roulette","tab-history","tab-profile"];
-let curTab = 0;
-document.querySelectorAll(".tabbtn").forEach((btn, idx) => {
-  btn.onclick = ()=>{ switchTab(idx); };
-});
-function switchTab(idx){
-  tabs.forEach((tab,i)=> {
-    document.getElementById(tab).classList.toggle("active",i===idx);
-    document.querySelectorAll(".tabbtn")[i].classList.toggle("active",i===idx);
-  });
-  curTab = idx;
-  if(idx===1) loadHistoryCards();
-  if(idx===2) showProfile();
-}
-let touchStartX=null;
-window.addEventListener("touchstart",e=>{
-  if(e.touches.length==1) touchStartX = e.touches[0].clientX;
-});
-window.addEventListener("touchend",e=>{
-  if(touchStartX==null) return;
-  let dx = e.changedTouches[0].clientX - touchStartX;
-  if(Math.abs(dx)>70){
-    if(dx<0 && curTab<tabs.length-1) switchTab(curTab+1);
-    if(dx>0 && curTab>0) switchTab(curTab-1);
-  }
-  touchStartX=null;
-});
-
-/* ---- 7. INFINITE ROULETTE ---- */
-const rouletteList = document.getElementById("rouletteList");
-let isSpinning = false, selectedIdx = 0, slots = [];
-function shuffle(arr) {
-  let a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-function fillRoulette(selected=-1) {
-  slots = [];
-  let l = 39;
-  let cycle = shuffle(gifts);
-  let k = 0;
-  for (let i=0; i<l; ++i) {
-    // Кладём В НОВЫЙ ОБЪЕКТ, чтобы избежать случайных мутаций!
-    slots.push({ ...cycle[k] });
-    k++;
-    if (k>=cycle.length) { cycle = shuffle(gifts); k=0; }
-  }
-  rouletteList.innerHTML = "";
-  for (let i=0; i<slots.length; ++i) {
-    const gift = slots[i];
-    const div = document.createElement("div");
-    div.className = "item" + (i===selected ? " selected" : "");
-    div.innerHTML = `<span>${gift.emoji}</span>`;
-    rouletteList.appendChild(div);
-  }
+/* ---- 3. TELEGRAM USER ---- */
+let userId, userName, userPhoto;
+{
+  const u = Telegram?.WebApp?.initDataUnsafe?.user;
+  if (!u) { alert("Откройте мини-апп из Telegram!"); throw 'noTg'; }
+  userId   = u.id;
+  userName = u.username ? '@'+u.username : u.first_name;
+  userPhoto= u.photo_url || 'https://telegram.org/img/t_logo.png';
+  db.ref("users/"+userId).update({ id:userId, name:userName, photo:userPhoto, lastVisit:new Date().toISOString() });
 }
 
-/* ---- 8. SPIN BUTTON ---- */
-document.getElementById("spinBtn").onclick = function() {
-  if (isSpinning) return;
-  isSpinning = true;
+/* ---- 4. PROFILE ---- */
+profileImg.src   = userPhoto;
+profileName.textContent = userName;
+profileId.textContent   = 'ID: '+userId;
+
+/* ---- 5. NAVIGATION ---- */
+const tabs=["tab-roulette","tab-history","tab-profile"];let curTab=0;
+document.querySelectorAll(".tabbtn").forEach((b,i)=>b.onclick=()=>switchTab(i));
+function switchTab(i){tabs.forEach((t,k)=>{document.getElementById(t).classList.toggle("active",k===i);document.querySelectorAll(".tabbtn")[k].classList.toggle("active",k===i)});curTab=i;if(i===1)loadHistoryCards();if(i===2)showProfile();}
+
+/* ---- 6. РУЛЕТКА ---- */
+const rouletteList=document.getElementById("rouletteList");
+let isSpinning=false,slots=[];
+function shuffle(a){return a.map(x=>x).sort(()=>Math.random()-.5);}
+function fillRoulette(){
+  slots=[];
+  let pool=shuffle(gifts);let idx=0;
+  for(let i=0;i<39;i++){slots.push({...pool[idx]});idx=(idx+1)%pool.length;if(idx===0)pool=shuffle(gifts);}
+  rouletteList.innerHTML=slots.map(g=>`<div class="item"><span>${g.emoji}</span></div>`).join('');
+}
+fillRoulette();
+
+/* ---- 7. SPIN ---- */
+spinBtn.onclick=()=>{
+  if(isSpinning)return;
+  isSpinning=true;
   fillRoulette();
-  // Определяем победителя
-  const centerIdx = Math.floor(slots.length/2);
-  const winGiftIdx = Math.random()<0.5?0:1;
-  const winGift = gifts[winGiftIdx];
-  // Создаём НОВЫЙ ОБЪЕКТ, чтобы избежать скрытых ссылок
-  slots[centerIdx] = { ...winGift };
-  selectedIdx = centerIdx;
-  rouletteList.style.transition = "none";
-  rouletteList.style.transform = "translateX(0)";
-  setTimeout(()=> {
-    rouletteList.style.transition = "transform 2.1s cubic-bezier(.11,.57,0,1)";
-    const width = 88+18;
-    const offset = selectedIdx*width - (rouletteList.parentNode.offsetWidth/2) + width/2;
-    rouletteList.style.transform = `translateX(${-offset}px)`;
-    setTimeout(()=>{
-      isSpinning = false;
-      document.getElementById("spinBtn").disabled = false;
-      for (let i=0;i<rouletteList.children.length;i++) {
-        rouletteList.children[i].classList.remove('win');
-        rouletteList.children[i].classList.remove('emoji-bounce');
-      }
-      const winner = slots[selectedIdx];
-      // ---- ОТЛАДКА: Выводим победителя и его id ----
-      console.log('WINNER OBJECT:', winner);
-      console.log('WINNER ID:', winner.id);
-      // ---- Строго сохраняем только ID ----
-      if (typeof winner.id === "number" && gifts.some(g=>g.id === winner.id)) {
-        db.ref("users/"+userId+"/spins").push({
-          gift: winner.id,
-          time: new Date().toLocaleString(),
-          status: "not_claimed"
-        });
-      } else {
-        alert('Ошибка! Некорректный айди подарка: ' + winner.id);
-      }
-      showWinModal(winner);
-      confettiEffect();
-      loadHistoryCards();
-    }, 2100);
-  }, 70);
-  document.getElementById("spinBtn").disabled = true;
-  setTimeout(()=>{document.getElementById("spinBtn").disabled = false;}, 3000);
+  const center=Math.floor(slots.length/2);
+  const winObj={...gifts[Math.random()<.5?0:1]};
+  slots[center]=winObj;
+  const w=106,offset=center*w-roulette.offsetWidth/2+w/2;
+  rouletteList.style.transition='none';
+  rouletteList.style.transform='translateX(0)';
+  requestAnimationFrame(()=>{
+    rouletteList.style.transition='transform 2.1s cubic-bezier(.11,.57,0,1)';
+    rouletteList.style.transform=`translateX(${-offset}px)`;
+  });
+  setTimeout(()=>{
+    isSpinning=false;
+    spinBtn.disabled=false;
+    saveSpin(winObj);      // <-- запись в БД
+    showWinModal(winObj);  // модалка + конфетти
+    loadHistoryCards();    // обновить историю
+  },2100);
+  spinBtn.disabled=true;
 };
+
+/* ---- 8. СОХРАНЕНИЕ СПИНА (id = строка) ---- */
+function saveSpin(gift){
+  db.ref("users/"+userId+"/spins").push({
+    gift: gift.id,              // строка!
+    time: new Date().toLocaleString(),
+    status: "not_claimed"
+  });
+}
 
 /* ---- 9. WIN MODAL ---- */
 function showWinModal(gift) {
-  document.getElementById("modalEmoji").textContent = gift.emoji;
-  document.getElementById("modalWinText").innerHTML = `Вы выиграли <b style="color:#ffd700;font-size:1.13em">${gift.emoji}</b>`;
-  document.getElementById("modalUser").innerHTML = `Пользователь: <span style="color:#ffd700">${userName}</span>`;
-  document.getElementById("modalBg").classList.add("active");
+  modalEmoji.textContent = gift.emoji;
+  modalWinText.innerHTML = `Вы выиграли <b style="color:#ffd700;font-size:1.13em">${gift.emoji}</b>`;
+  modalUser.innerHTML = `Пользователь: <span style="color:#ffd700">${userName}</span>`;
+  modalBg.classList.add("active");
+  confettiEffect();
 }
-document.getElementById("writeBotBtn").onclick = ()=> {
-  window.open("https://t.me/MrFerra","_blank");
-};
-document.getElementById("confirmWinBtn").onclick = ()=> {
-  document.getElementById("modalBg").classList.remove("active");
-  document.getElementById('msg-tip').innerHTML = `
+writeBotBtn.onclick=()=>window.open('https://t.me/MrFerra','_blank');
+confirmWinBtn.onclick=()=>{
+  modalBg.classList.remove("active");
+  msgTip.innerHTML = `
     <span class="status-dot"></span> Ожидаем подтверждения выдачи подарка...<br>
     <span style="color:#aaa;font-size:0.98em;">Бот автоматически обновит статус.</span>
   `;
   listenForDelivered();
 };
 
-/* ---- 10. АВТООБНОВЛЕНИЕ СТАТУСА ---- */
+/* ---- 10. ИСТОРИЯ ---- */
+let historyFilter = "all";
+filterAll.onclick = ()=>{ setHistoryFilter("all"); };
+filterNotClaimed.onclick = ()=>{ setHistoryFilter("not_claimed"); };
+filterClaimed.onclick = ()=>{ setHistoryFilter("delivered"); };
+function setHistoryFilter(f){
+  historyFilter = f;
+  filterAll.classList.toggle("active",f==="all");
+  filterNotClaimed.classList.toggle("active",f==="not_claimed");
+  filterClaimed.classList.toggle("active",f==="delivered");
+  loadHistoryCards();
+}
+function loadHistoryCards(){
+  db.ref("users/"+userId+"/spins").once("value",snap=>{
+    const arr=[];snap.forEach(ch=>arr.push(ch.val()));arr.reverse();
+    historyCards.innerHTML=arr.map(v=>{
+      const g=gifts.find(x=>x.id===v.gift); // сравнение по строкам!
+      let statusTxt = "Не получен", statusClass = "hstatus-none";
+      if(v.status==="not_claimed") statusTxt = "Ожидает подтверждения", statusClass = "hstatus-await";
+      if(v.status==="delivered") statusTxt = "Получен", statusClass = "hstatus-done";
+      return `<div class="history-card"><span class="history-emoji">${g?g.emoji:'🎁'}</span>
+        <div class="history-info"><div style="font-weight:700;font-size:1.1em;">${g?g.emoji:'?'}</div>
+        <div class="history-date">${v.time}</div></div>
+        <span class="history-status ${statusClass}">${statusTxt}</span></div>`;
+    }).join('')||'<div style="padding:20px;text-align:center;color:#999">Пока пусто</div>';
+  });
+}
+
+/* ---- 11. АВТООБНОВЛЕНИЕ СТАТУСА ---- */
 let deliveredListener = null;
 function listenForDelivered() {
   if(deliveredListener) deliveredListener.off();
@@ -455,64 +403,17 @@ function listenForDelivered() {
       if(v.status==="delivered") anyDelivered=true;
     });
     if(anyDelivered) {
-      document.getElementById('msg-tip').innerHTML = `<span style="font-size:1.09em;color:#ffd700;">Поздравляем!</span> Ваш подарок выдан!`;
+      msgTip.innerHTML = `<span style="font-size:1.09em;color:#ffd700;">Поздравляем!</span> Ваш подарок выдан!`;
       loadHistoryCards();
       if(deliveredListener) deliveredListener.off();
     }
   });
 }
 
-/* ---- 11. ИСТОРИЯ ---- */
-let historyFilter = "all";
-document.getElementById("filterAll").onclick = ()=>{ setHistoryFilter("all"); };
-document.getElementById("filterNotClaimed").onclick = ()=>{ setHistoryFilter("not_claimed"); };
-document.getElementById("filterClaimed").onclick = ()=>{ setHistoryFilter("delivered"); };
-function setHistoryFilter(f){
-  historyFilter = f;
-  document.getElementById("filterAll").classList.toggle("active",f==="all");
-  document.getElementById("filterNotClaimed").classList.toggle("active",f==="not_claimed");
-  document.getElementById("filterClaimed").classList.toggle("active",f==="delivered");
-  loadHistoryCards();
-}
-function loadHistoryCards() {
-  if (!userId) return;
-  db.ref("users/" + userId + "/spins").once("value", snap => {
-    const arr = [];
-    snap.forEach(child => {
-      const v = child.val();
-      if(historyFilter==="all" || v.status===historyFilter) {
-        arr.push({...v, key:child.key});
-      }
-    });
-    arr.reverse();
-    let html = arr.length
-      ? arr.map(v=>{
-        const g=gifts.find(g=>g.id==v.gift);
-        let statusTxt = "Не получен", statusClass = "hstatus-none";
-        if(v.status==="not_claimed") statusTxt = "Ожидает подтверждения", statusClass = "hstatus-await";
-        if(v.status==="delivered") statusTxt = "Получен", statusClass = "hstatus-done";
-        return `
-        <div class="history-card">
-          <span class="history-emoji">${g?g.emoji:'🎁'}</span>
-          <div class="history-info">
-            <div style="font-size:1.11em;font-weight:700;">${g?g.emoji:'Подарок'}</div>
-            <div class="history-date">${v.time||''}</div>
-          </div>
-          <span class="history-status ${statusClass}">${statusTxt}</span>
-        </div>`;
-      }).join('')
-      : '<div style="padding:22px;text-align:center;color:#999;">Вы ещё ничего не выиграли</div>';
-    document.getElementById("historyCards").innerHTML = `<div class="history-list">${html}</div>`;
-  });
-}
-
-/* ---- 12. LINK TO BOT в рулетке ---- */
-document.getElementById("unameBtn").onclick = () => window.open("https://t.me/MrFerra", "_blank");
-
-/* ---- 13. CONFETTI ---- */
+/* ---- 12. CONFETTI ---- */
 function confettiEffect() {
   const colors = ["#ffd700", "#ff69b4", "#00e0ca", "#ffe579", "#f68c47", "#74dbef", "#f54555"];
-  const canvas = document.getElementById("confetti");
+  const canvas = confetti;
   const ctx = canvas.getContext("2d");
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -552,7 +453,7 @@ function confettiEffect() {
   draw();
 }
 
-/* ---- 14. INIT ---- */
+/* ---- 13. ИНИЦИАЛИЗАЦИЯ ---- */
 fillRoulette();
 </script>
 </body>
