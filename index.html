@@ -2,28 +2,34 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Gift Roulette — CS:GO Case Style</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <title>Gift Roulette — TMA Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <link href="https://fonts.googleapis.com/css?family=Russo+One|Montserrat:600,400&display=swap" rel="stylesheet">
   <style>
-    html, body {
+    html,body {
       background: linear-gradient(120deg, #181e24 0%, #23272f 100%);
       min-height: 100vh;
-      margin: 0; padding: 0;
       font-family: 'Montserrat', sans-serif;
+      margin: 0;
+      padding: 0;
       color: #fff;
     }
     .container {
-      max-width: 380px; margin: 32px auto;
+      max-width: 380px;
+      margin: 32px auto;
       background: #212633;
       border-radius: 20px;
       box-shadow: 0 6px 28px #000a;
-      padding: 30px 18px 24px;
+      padding: 30px 18px 24px 18px;
       text-align: center;
+      position: relative;
+      overflow: visible;
     }
     .profile {
-      display: flex; align-items: center;
-      margin-bottom: 18px; gap: 16px;
+      display: flex;
+      align-items: center;
+      margin-bottom: 18px;
+      gap: 16px;
       justify-content: center;
     }
     .profile-img {
@@ -32,44 +38,67 @@
       object-fit: cover;
       border: 2.5px solid #ffe48a;
       background: #191c22;
+      margin-right: 6px;
     }
     .profile-info {
-      text-align: left; font-size: 1.05rem; max-width: 200px;
-      overflow: hidden; text-overflow: ellipsis;
+      text-align: left;
+      font-size: 1.05rem;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .profile-info .uname {
       color: #ffe79c;
-      font-family: 'Russo One', sans-serif;
-      font-size: 1.18rem; margin-bottom: 3px;
-      display: block; word-break: break-word;
+      font-family: 'Russo One', Arial, sans-serif;
+      font-size: 1.18rem;
+      margin-bottom: 3px;
+      display: block;
+      word-break: break-word;
     }
     .title {
-      font-family: 'Russo One', sans-serif;
-      font-size: 2.2rem; letter-spacing: 1.5px; margin-bottom: 4px;
+      font-family: 'Russo One', Arial, sans-serif;
+      font-size: 2.2rem;
+      letter-spacing: 1.5px;
+      margin-bottom: 4px;
       background: linear-gradient(90deg, #e4c05c, #ffefb0 60%, #b0a871);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       display: inline-block;
     }
     .roulette {
-      background: #181d22; border: 2px solid #2f3642;
-      border-radius: 18px; box-shadow: inset 0 4px 18px #0006;
-      margin: 18px 0; padding: 20px 0 16px;
-      position: relative; overflow: hidden; min-height: 88px;
+      background: #181d22;
+      border: 2px solid #2f3642;
+      border-radius: 18px;
+      box-shadow: 0 4px 18px #0006 inset;
+      margin: 18px 0 16px 0;
+      padding: 20px 0 16px 0;
+      position: relative;
+      overflow: hidden;
+      min-height: 88px;
       user-select: none;
     }
     .roulette-list {
-      display: flex; align-items: center;
+      display: flex;
       transition: transform 2.6s cubic-bezier(.11,.57,0,1);
       will-change: transform;
+      align-items: center;
     }
     .item {
-      width: 76px; height: 76px; margin: 0 6px;
-      background: #242d3a; border-radius: 13px;
+      min-width: 76px;
+      max-width: 76px;
+      height: 76px;
+      margin: 0 6px;
+      background: #242d3a;
+      border-radius: 13px;
       box-shadow: 0 2px 10px #0007;
-      display: flex; flex-direction: column;
-      justify-content: center; align-items: center;
-      border: 2px solid #222b; font-size: 1.5rem;
-      position: relative; transition: border .12s;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid #222b;
+      font-size: 1.5rem;
+      transition: border .12s;
+      position: relative;
     }
     .item.selected, .item.win {
       border-color: #ffd700;
@@ -77,113 +106,168 @@
       z-index: 2;
     }
     .item .gift-name {
-      font-size: 0.93rem; color: #f4d58b;
-      margin-top: 7px; letter-spacing: .03em;
+      font-size: 0.93rem;
+      color: #f4d58b;
+      margin-top: 7px;
+      letter-spacing: .03em;
     }
     .marker {
-      position: absolute; top: 6px; left: 50%;
+      position: absolute;
+      top: 6px;
+      left: 50%;
       transform: translateX(-50%);
+      z-index: 2;
       width: 0; height: 0;
       border-left: 15px solid transparent;
       border-right: 15px solid transparent;
       border-bottom: 20px solid #f5cb4e;
       filter: drop-shadow(0 2px 6px #222a);
-      z-index:2;
     }
     .spin-btn {
-      margin-top: 20px; width: 90%; padding: 15px;
-      border-radius: 16px; background: linear-gradient(90deg, #f5cb4e, #f9e67c 70%, #f5cb4e);
-      color: #191f26; font-family: 'Russo One', sans-serif;
-      font-size: 1.3rem; letter-spacing: .07em; border: none;
-      box-shadow: 0 2px 14px #0005; cursor: pointer;
-      font-weight:700; transition: background .15s, transform .09s;
+      margin-top: 20px;
+      width: 90%;
+      padding: 15px;
+      border-radius: 16px;
+      background: linear-gradient(90deg, #f5cb4e, #f9e67c 70%, #f5cb4e);
+      color: #191f26;
+      font-family: 'Russo One', Arial, sans-serif;
+      font-size: 1.3rem;
+      letter-spacing: .07em;
+      border: none;
+      outline: none;
+      box-shadow: 0 2px 14px #0005;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background .15s, transform .09s;
+      margin-bottom: 2px;
     }
-    .spin-btn:disabled {
-      opacity: 0.6; cursor: default;
-    }
-    .spin-btn:active:not(:disabled) {
-      background: #f6e5a3; transform: scale(.97);
+    .spin-btn:active, .spin-btn:disabled {
+      background: #f6e5a3;
+      transform: scale(.97);
+      opacity: 0.8;
+      cursor: not-allowed;
     }
     .msg {
-      background: #262c36; border-radius: 12px;
-      margin:18px 0; padding: 15px 8px; font-size:1.13rem;
-      box-shadow: inset 0 2px 8px #0004; line-height:1.55;
+      background: #262c36;
+      border-radius: 12px;
+      margin: 18px 0 10px 0;
+      padding: 15px 8px 13px 8px;
+      font-size: 1.13rem;
+      box-shadow: 0 2px 8px #0004 inset;
+      line-height: 1.55;
+      min-height: 60px;
+      display: none;
     }
+    .msg.visible { display: block; }
     .confirm-btn {
-      background: #3ab54a; color:#fff; padding:13px 34px;
-      border-radius:13px; font-size:1.15rem; font-weight:700;
-      border:none; cursor:pointer; transition:background .14s;
+      background: #3ab54a;
+      color: #fff;
+      padding: 13px 34px;
+      border-radius: 13px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-top: 12px;
+      border: none;
+      cursor: pointer;
+      transition: background .14s;
+      display: none;
     }
-    .confirm-btn:active { background:#278030; }
-    .history {
-      background:#242d3a; border-radius:13px;
-      margin-top:24px; padding:13px 10px; text-align:left;
-      font-size:.95rem; color:#ccc; min-height:36px;
-    }
-    .history h4 { margin:0 0 8px; color:#e8c067; font-size:1.1rem;}
-    .history ul { margin:0; padding-left:14px;}
-    .history li { margin-bottom:2px;}
-    /* Snackbar */
-    #snackbar {
+    .confirm-btn:active { background: #278030; }
+    .confirm-btn.visible { display: inline-block; }
+    .snackbar {
       visibility: hidden;
-      min-width: 200px;
-      background-color: #333;
+      min-width: 180px;
+      background: #242d3a;
       color: #fff;
       text-align: center;
-      border-radius: 8px;
-      padding: 14px;
+      border-radius: 11px;
+      padding: 13px 22px;
       position: fixed;
-      left: 50%; bottom: 30px;
+      z-index: 99;
+      left: 50%;
+      bottom: 40px;
       transform: translateX(-50%);
-      z-index: 999;
       font-size: 1rem;
+      box-shadow: 0 2px 14px #0007;
+      transition: visibility 0s, opacity .35s cubic-bezier(.4,.01,0,1), bottom .23s;
+      opacity: 0;
+      pointer-events: none;
     }
-    #snackbar.show {
+    .snackbar.show {
       visibility: visible;
-      animation: fadein 0.3s, fadeout 0.3s 2.7s;
+      opacity: 1;
+      pointer-events: auto;
+      bottom: 65px;
     }
-    @keyframes fadein { from {bottom: 10px; opacity:0;} to {bottom:30px; opacity:1;} }
-    @keyframes fadeout{ from {opacity:1;} to {opacity:0;} }
-    @media(max-width:480px){
-      .container{max-width:99vw;margin:12px 2vw;}
-      .roulette{min-height:72px;}
-      .item{width:64px;height:64px;}
-      .profile-img{width:42px;height:42px;}
+    .history {
+      background: #242d3a;
+      border-radius: 13px;
+      margin-top: 24px;
+      padding: 13px 10px 9px 10px;
+      text-align: left;
+      font-size: 0.95rem;
+      color: #ccc;
+      min-height: 36px;
+    }
+    .history h4 {
+      margin: 0 0 8px 0;
+      color: #e8c067;
+      font-size: 1.1rem;
+    }
+    .history ul {
+      margin: 0; padding: 0 0 0 14px;
+    }
+    .history li {
+      margin-bottom: 2px;
+      color: #eee;
+    }
+    .confetti {
+      position: fixed;
+      pointer-events: none;
+      top: 0; left: 0; width: 100vw; height: 100vh; z-index: 120;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    @media (max-width: 480px) {
+      .container { max-width: 99vw; margin: 12px 2vw;}
+      .roulette { min-height: 72px; }
+      .item { min-width: 64px; max-width: 64px; height: 64px;}
+      .profile-img { width: 42px; height: 42px;}
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="profile" id="profileBox" style="display:none;">
-      <img class="profile-img" id="profileImg" src="" alt="User">
-      <div class="profile-info">
-        <span class="uname" id="profileName"></span>
-        <span id="profileId"></span>
-      </div>
-    </div>
-    <div class="title">Gift Roulette</div>
-    <div class="roulette" id="roulette">
-      <div class="marker"></div>
-      <div class="roulette-list" id="rouletteList"></div>
-    </div>
-    <button class="spin-btn" id="spinBtn">Крутить бесплатно</button>
-    <div class="msg" id="msgBox" style="display:none;"></div>
-    <button class="confirm-btn" id="confirmBtn" style="display:none;">Я отправил сообщение боту</button>
-    <div class="history" id="historyBox">
-      <h4>История выигрышей</h4>
-      <ul id="historyList"></ul>
+<div class="container">
+  <div class="profile" id="profileBox" style="display:none;">
+    <img class="profile-img" id="profileImg" src="" alt="User">
+    <div class="profile-info">
+      <span class="uname" id="profileName"></span>
+      <span id="profileId"></span>
     </div>
   </div>
-  <div id="snackbar"></div>
+  <div class="title">Gift Roulette</div>
+  <div class="roulette" id="roulette">
+    <div class="marker"></div>
+    <div class="roulette-list" id="rouletteList"></div>
+  </div>
+  <button class="spin-btn" id="spinBtn">Крутить бесплатно</button>
+  <div class="msg" id="msgBox"></div>
+  <button class="confirm-btn" id="confirmBtn">Я отправил сообщение боту</button>
+  <div class="history" id="historyBox">
+    <h4>История выигрышей</h4>
+    <ul id="historyList"></ul>
+  </div>
+</div>
+<div class="snackbar" id="snackbar"></div>
+<canvas class="confetti" id="confetti"></canvas>
 
-  <!-- Firebase & Telegram SDK & confetti -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-  <script>
-    // 1. CONFIG
-   const firebaseConfig = {
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+/* ---- 1. CONFIG ---- */
+// Вставь сюда свой firebase config:
+const firebaseConfig = {
   apiKey: "AIzaSyDX8BiSqlghdgOj4_zPSyPgATfHVV5DNQI",
   authDomain: "gifts-d8f30.firebaseapp.com",
   projectId: "gifts-d8f30",
@@ -192,138 +276,212 @@
   appId: "1:883903383261:web:dad1742c009ea38bf5fd34",
   measurementId: "G-5JFXH4YG3J"
 };
-    const gifts = [
-      {id:5170145012310081615,emoji:"💖",name:"Сердце"},
-      {id:5170233102089322756,emoji:"🧸",name:"Плюшевый мишка"}
-    ];
-    const maxPerGift = 5;
-    // 2. INIT
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    // 3. SnackBar
-    function showSnackbar(msg) {
-      const sb = document.getElementById("snackbar");
-      sb.textContent = msg;
-      sb.className = "show";
-      setTimeout(()=> sb.className = sb.className.replace("show",""), 3000);
-    }
-    // 4. TELEGRAM AUTH
-    let userId, userName, userPhoto;
-    function initTG(){
-      const T = Telegram.WebApp;
-      if(!T?.initDataUnsafe?.user){
-        showSnackbar("Откройте в Telegram Mini App");
-        throw "No TMA";
-      }
-      const u = T.initDataUnsafe.user;
-      userId = u.id;
-      userName = u.username? "@"+u.username : u.first_name||"User";
-      userPhoto = u.photo_url || "https://telegram.org/img/t_logo.png";
-      document.getElementById("profileImg").src = userPhoto;
-      document.getElementById("profileName").textContent = userName;
-      document.getElementById("profileId").textContent = "ID: "+userId;
-      document.getElementById("profileBox").style.display="";
-    }
-    initTG();
-    // 5. SAVE USER
-    db.ref("users/"+userId).update({
-      id:userId,name:userName,photo:userPhoto,
-      lastVisit: new Date().toISOString()
+const gifts = [
+  { id: 5170145012310081615, emoji: "💖", name: "Сердце" },
+  { id: 5170233102089322756, emoji: "🧸", name: "Плюшевый мишка" }
+];
+
+/* ---- 2. FIREBASE INIT ---- */
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+/* ---- 3. TELEGRAM AUTH ---- */
+let userId = null, userName = "", userPhoto = "";
+function getTelegramUser() {
+  if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
+    const tgUser = Telegram.WebApp.initDataUnsafe.user;
+    userId = tgUser.id;
+    userName = (tgUser.username ? ("@" + tgUser.username) : tgUser.first_name || "User");
+    userPhoto = tgUser.photo_url ? tgUser.photo_url : "https://telegram.org/img/t_logo.png";
+    return tgUser;
+  } else {
+    showSnackbar("Откройте сайт из Telegram Mini App!");
+    throw "Not in Telegram Mini App";
+  }
+}
+const tgUser = getTelegramUser();
+
+/* ---- 4. SAVE USER IN DB (on enter) ---- */
+function saveUserOnEnter() {
+  if (!userId) return;
+  db.ref("users/" + userId).update({
+    id: userId,
+    name: userName,
+    photo: userPhoto,
+    lastVisit: new Date().toISOString()
+  });
+}
+saveUserOnEnter();
+
+/* ---- 5. SHOW USER PROFILE ---- */
+function showProfile() {
+  if (!userId) return;
+  document.getElementById('profileImg').src = userPhoto;
+  document.getElementById('profileName').textContent = userName;
+  document.getElementById('profileId').textContent = "ID: " + userId;
+  document.getElementById('profileBox').style.display = '';
+}
+showProfile();
+
+/* ---- 6. HISTORY ---- */
+function loadHistory() {
+  if (!userId) return;
+  db.ref("users/" + userId + "/spins").once("value", snap => {
+    const arr = [];
+    snap.forEach(child => {
+      const v = child.val();
+      arr.push(`${v.time}: ${gifts.find(g=>g.id==v.gift)?.emoji||'🎁'} <b>${gifts.find(g=>g.id==v.gift)?.name||'Подарок'}</b>`);
     });
-    // 6. HISTORY
-    function loadHistory(){
-      db.ref("users/"+userId+"/spins").once("value",snap=>{
-        const ul = document.getElementById("historyList");
-        const arr = [];
-        snap.forEach(c=> arr.push(c.val()));
-        ul.innerHTML = arr.length
-          ? arr.map(v=>`<li>${v.time}: ${gifts.find(g=>g.id==v.gift)?.emoji||"🎁"} <b>${gifts.find(g=>g.id==v.gift)?.name}</b></li>`).join("")
-          : "<li>Пока ничего не выиграно</li>";
+    document.getElementById('historyList').innerHTML = arr.length
+      ? arr.map(x=>`<li>${x}</li>`).join('')
+      : '<li>Пока ничего не выиграно</li>';
+  });
+}
+window.onload = loadHistory;
+
+/* ---- 7. ROULETTE ---- */
+const rouletteList = document.getElementById("rouletteList");
+let isSpinning = false, selectedIdx = 0;
+
+function fillRoulette(selected=-1) {
+  rouletteList.innerHTML = "";
+  // Всегда заполняем 20 элементов, чтобы призы шли подряд
+  for (let i=0; i<20; ++i) {
+    const gift = gifts[i % gifts.length];
+    const div = document.createElement("div");
+    div.className = "item" + (i===selected ? " selected" : "");
+    div.innerHTML = `<div style="font-size:2.2em">${gift.emoji}</div><div class="gift-name">${gift.name}</div>`;
+    rouletteList.appendChild(div);
+  }
+}
+
+/* ---- 8. SPIN BUTTON ---- */
+document.getElementById("spinBtn").onclick = function() {
+  if (isSpinning) return;
+  isSpinning = true;
+  document.getElementById('msgBox').classList.remove('visible');
+  document.getElementById('confirmBtn').classList.remove('visible');
+
+  // Честный шанс 50/50 для двух подарков
+  const winIdx = Math.random() < 0.5 ? 0 : 1;
+  const spinRounds = 14 + Math.floor(Math.random()*6); // случайное количество оборотов
+  selectedIdx = spinRounds * gifts.length + winIdx;
+
+  fillRoulette();
+
+  rouletteList.style.transition = "none";
+  rouletteList.style.transform = "translateX(0)";
+
+  // Анимация
+  setTimeout(()=> {
+    rouletteList.style.transition = "transform 2.8s cubic-bezier(.11,.57,0,1)";
+    const width = 76+12; // item+margin*2
+    const offset = selectedIdx*width - (rouletteList.parentNode.offsetWidth/2) + width/2;
+    rouletteList.style.transform = `translateX(${-offset}px)`;
+
+    setTimeout(()=>{
+      isSpinning = false;
+      document.getElementById("spinBtn").disabled = false;
+      for (let i=0;i<rouletteList.children.length;i++) rouletteList.children[i].classList.remove('win');
+      rouletteList.children[selectedIdx].classList.add('win');
+
+      // Показать выигрыш, записать в Firebase
+      const gift = gifts[winIdx];
+      const msg = `<span style="font-size:1.2em;font-weight:700;color:#ffe57c;">Поздравляем!</span><br>
+      Вы выиграли <b>${gift.emoji} ${gift.name}</b>!<br>
+      <span style="color:#9f9;">Чтобы получить приз, <b>напишите любое сообщение боту <a href="https://t.me/MrFerra" target="_blank">@MrFerra</a></b>.</span><br>
+      <span style="color:#aaa;font-size:0.98em;">После этого нажмите кнопку ниже.</span>`;
+      document.getElementById('msgBox').innerHTML = msg;
+      document.getElementById('msgBox').classList.add('visible');
+      document.getElementById('confirmBtn').classList.add('visible');
+
+      // Запись в базу
+      const now = new Date();
+      db.ref("users/"+userId).update({
+        id: userId,
+        name: userName,
+        photo: userPhoto,
+        lastSpin: now.toISOString()
       });
-    }
-    window.onload = loadHistory;
-    // 7. GIFT COUNTS
-    let availableGifts = [...gifts];
-    function refreshGiftCounts(cb){
-      db.ref("prizes").once("value",snap=>{
-        const counts = {};
-        snap.forEach(c=>counts[c.key]=c.val());
-        availableGifts = gifts.filter(g=> (counts[g.id]||0) < maxPerGift );
-        if(!availableGifts.length){
-          db.ref("prizes").set(null);
-          availableGifts=[...gifts];
-        }
-        cb();
+      db.ref("users/"+userId+"/spins").push({
+        gift: gift.id,
+        time: now.toLocaleString()
       });
+      loadHistory();
+
+      // Конфетти!
+      confettiEffect();
+
+    }, 2850);
+  }, 80);
+
+  document.getElementById("spinBtn").disabled = true;
+  setTimeout(()=>{document.getElementById("spinBtn").disabled = false;}, 3500);
+};
+
+/* ---- 9. CONFIRM BUTTON ---- */
+document.getElementById('confirmBtn').onclick = function() {
+  db.ref("users/"+userId).update({
+    confirmed: new Date().toISOString()
+  });
+  document.getElementById('msgBox').innerHTML = `<span style="font-size:1.18em;color:#ffd700;">Спасибо!</span><br>Ваша заявка отмечена.<br>Ожидайте выдачу подарка ботом.`;
+  document.getElementById('confirmBtn').classList.remove('visible');
+};
+
+/* ---- 10. SNACKBAR ---- */
+function showSnackbar(msg, time=2800) {
+  let sb = document.getElementById('snackbar');
+  sb.textContent = msg;
+  sb.className = "snackbar show";
+  setTimeout(()=>{ sb.className = "snackbar"; }, time);
+}
+
+/* ---- 11. CONFETTI ---- */
+// Красочное конфетти после выигрыша
+function confettiEffect() {
+  const colors = ["#ffd700", "#ff69b4", "#00e0ca", "#ffe579", "#f68c47", "#74dbef", "#f54555"];
+  const canvas = document.getElementById("confetti");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  let pieces = [];
+  for (let i = 0; i < 110; i++) {
+    pieces.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height * 0.1,
+      w: 7 + Math.random() * 8,
+      h: 16 + Math.random() * 6,
+      angle: Math.random() * 2 * Math.PI,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      vy: 2 + Math.random() * 3,
+      vx: (Math.random() - 0.5) * 2.5,
+      va: (Math.random() - 0.5) * 0.08
+    });
+  }
+  let frames = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let p of pieces) {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.angle);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+      p.x += p.vx;
+      p.y += p.vy;
+      p.angle += p.va;
+      if (p.y > canvas.height) p.y = -20, p.x = Math.random()*canvas.width;
     }
-    // 8. ROULETTE
-    const listEl = document.getElementById("rouletteList");
-    let spinning=false,selIdx=0;
-    function fillRoulette(){
-      listEl.innerHTML = "";
-      for(let i=0;i<gifts.length*4;i++){
-        const g = gifts[i%gifts.length];
-        const div = document.createElement("div");
-        div.className="item";
-        div.innerHTML=`<div style="font-size:2.2em">${g.emoji}</div><div class="gift-name">${g.name}</div>`;
-        listEl.appendChild(div);
-      }
-    }
-    fillRoulette();
-    // 9. SPIN LOGIC
-    document.getElementById("spinBtn").onclick = ()=>{
-      if(spinning) return;
-      refreshGiftCounts(()=>{
-        if(!availableGifts.length){
-          showSnackbar("Все призы закончились, обновляем...");
-          return;
-        }
-        spinning = true;
-        document.getElementById("spinBtn").disabled=true;
-        document.getElementById("msgBox").style.display="none";
-        document.getElementById("confirmBtn").style.display="none";
-        // pick
-        const win = availableGifts[Math.floor(Math.random()*availableGifts.length)];
-        const winBase = gifts.findIndex(g=>g.id===win.id);
-        const rounds = 16 + Math.random()*4|0;
-        selIdx = rounds*gifts.length + winBase;
-        // animate
-        fillRoulette();
-        listEl.style.transition="none"; listEl.style.transform="translateX(0)";
-        setTimeout(()=>{
-          const w=76+12;
-          listEl.style.transition="transform 2.7s cubic-bezier(.11,.57,0,1)";
-          const offset = selIdx*w - (listEl.parentNode.offsetWidth/2)+w/2;
-          listEl.style.transform=`translateX(${-offset}px)`;
-          setTimeout(()=>{ // on finish
-            spinning=false;
-            document.getElementById("spinBtn").disabled=false;
-            listEl.children[selIdx].classList.add("win");
-            // confetti
-            confetti({ particleCount:100, spread:70 });
-            // show msg
-            const msg=`Вы выиграли <b>${win.emoji} ${win.name}</b>!<br>
-              Напишите боту <a href="https://t.me/MrFerra" target="_blank">@MrFerra</a> и жмите ниже.`;
-            const mb=document.getElementById("msgBox");
-            mb.innerHTML=msg; mb.style.display="";
-            document.getElementById("confirmBtn").style.display="";
-            // record
-            const now=new Date();
-            db.ref("prizes/"+win.id).transaction(c=> (c||0)+1 );
-            db.ref("users/"+userId).update({ lastSpin:now.toISOString() });
-            db.ref("users/"+userId+"/spins").push({ gift:win.id, time:now.toLocaleString() });
-            loadHistory();
-          }, 2800);
-        },80);
-      });
-    };
-    // 10. CONFIRM
-    document.getElementById("confirmBtn").onclick=()=>{
-      db.ref("users/"+userId).update({ confirmed:new Date().toISOString() });
-      document.getElementById("msgBox").innerHTML="✔ Заявка отмечена, ожидайте подарок!";
-      document.getElementById("confirmBtn").style.display="none";
-      showSnackbar("Подтверждено!");
-    };
-  </script>
+    frames++;
+    if (frames < 85) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  draw();
+}
+
+/* ---- 12. INIT ---- */
+fillRoulette();
+</script>
 </body>
 </html>
